@@ -29,6 +29,14 @@ layer(base);
   --color-danger: #b3261e;
   --color-focus-ring: #1f4d36;
 
+  /* Code blocks: dark in both themes so copied commands look the same. */
+  --color-code-surface: #18241d;
+  --color-code-ink: #e6ece4;
+  --color-syntax-keyword: #8fd3a8;
+  --color-syntax-string: #e9b949;
+  --color-syntax-number: #d9a887;
+  --color-syntax-comment: #9aa596;
+
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 16px;
@@ -67,6 +75,17 @@ layer(base);
   --text-receipt: 13px;
   --text-receipt--line-height: 20px;
   --text-receipt--font-weight: 400;
+  --text-code: 14px;
+  --text-code--line-height: 22px;
+  --text-code--font-weight: 400;
+  --text-code-inline: 0.92em;
+  --text-code-inline--line-height: inherit;
+  --text-code-inline--font-weight: 500;
+
+  /* Docs and landing widths: max-w-docs-content, w-docs-sidebar, etc. */
+  --container-docs-sidebar: 248px;
+  --container-docs-content: 720px;
+  --container-landing-max: 1200px;
 }
 
 /*
@@ -167,6 +186,27 @@ layer(base);
   b,
   strong {
     font-weight: 600;
+  }
+
+  /* Inline code: field-soft ground, radius-sm, code-inline type. */
+  :not(pre) > code {
+    font-family: var(--font-mono);
+    font-size: var(--text-code-inline);
+    font-weight: 500;
+    background: var(--color-field-soft);
+    border-radius: var(--radius-sm);
+    padding: 0.1em 0.35em;
+  }
+
+  pre {
+    font-family: var(--font-mono);
+    font-size: var(--text-code);
+    line-height: var(--text-code--line-height);
+    background: var(--color-code-surface);
+    color: var(--color-code-ink);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    overflow-x: auto;
   }
 
   a,

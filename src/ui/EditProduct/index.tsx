@@ -56,6 +56,7 @@ export default function EditProduct({ id, onProductUpdate }: EditProductProps) {
     const data = {
       name: formData.get("name") as string,
       category: formData.get("category") as string,
+      description: (formData.get("description") as string) || null,
       purchase: formData.get("purchase") as string,
       mrp: formData.get("mrp") as string,
       pretax: formData.get("special") as string,
@@ -72,6 +73,7 @@ export default function EditProduct({ id, onProductUpdate }: EditProductProps) {
         .update({
           name: data.name,
           category: data.category,
+          description: data.description,
           purchase: data.purchase,
           mrp: data.mrp,
           pretax: data.pretax,
@@ -116,7 +118,7 @@ export default function EditProduct({ id, onProductUpdate }: EditProductProps) {
                   type="text"
                   name="name"
                   id="edit-name"
-                  placeholder="Some Product Name"
+                  placeholder="Ceramic mug, 350 ml"
                   defaultValue={product.name}
                   className={adminInputClass}
                   required
@@ -129,6 +131,16 @@ export default function EditProduct({ id, onProductUpdate }: EditProductProps) {
                   id="edit-category"
                   placeholder="Category"
                   defaultValue={product.category}
+                  className={adminInputClass}
+                />
+              </AdminField>
+              <AdminField label="Description" htmlFor="edit-description">
+                <textarea
+                  name="description"
+                  id="edit-description"
+                  rows={3}
+                  placeholder="Material, size, weight, care"
+                  defaultValue={product.description}
                   className={adminInputClass}
                 />
               </AdminField>

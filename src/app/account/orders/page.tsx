@@ -2,6 +2,9 @@ import GenerateBill from "@/ui/GenerateBill";
 import { createClient } from "@/utils/supabase/server";
 import { format } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
+import { formatINR } from "@/utils/formatINR";
+import { formatInvoiceNo } from "@/utils/formatInvoiceNo";
+import { statusLabel } from "@/utils/statusLabel";
 
 function OrderItems({ products }: { products: any[] }) {
   if (!Array.isArray(products)) {
@@ -24,8 +27,10 @@ function OrderRow(order: any) {
     <div className="bg-surface-raised rounded-md border border-line p-4 mb-4 last:mb-0">
       <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center sm:justify-between gap-3 mb-3">
         <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
-          <span className="text-sm text-ink-muted">Order</span>
-          <span className="font-semibold text-ink">#{order.id}</span>
+          <span className="font-semibold text-ink font-mono tabular-nums">
+            {formatInvoiceNo(order.invoice_id, order.created_at) ??
+              "Awaiting payment"}
+          </span>
           <span className="text-sm text-ink">
             {format(
               toZonedTime(order.created_at, "Asia/Kolkata"),
@@ -33,16 +38,16 @@ function OrderRow(order: any) {
             )}
           </span>
         </div>
-        <span className="font-semibold text-field font-mono tabular-nums">₹{Number(order.amount).toFixed(2)}</span>
+        <span className="font-semibold text-field font-mono tabular-nums">{formatINR(order.amount)}</span>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm mb-3">
         <div>
           <span className="text-ink-muted">Payment: </span>
-          <span className="capitalize text-ink">{order.payment_status}</span>
+          <span className="text-ink">{statusLabel(order.payment_status)}</span>
         </div>
         <div>
           <span className="text-ink-muted">Delivery: </span>
-          <span className="capitalize text-ink">{order.delivery_status}</span>
+          <span className="text-ink">{statusLabel(order.delivery_status)}</span>
         </div>
       </div>
       <div className="mb-3">
@@ -84,6 +89,7 @@ export default async function Orders() {
           <OrderRow
             key={order.id}
             id={order.id}
+            invoice_id={order.invoice_id}
             created_at={order.created_at}
             razorpay_id={order.razorpay_id}
             payment_status={order.payment_status}

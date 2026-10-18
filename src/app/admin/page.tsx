@@ -3,6 +3,11 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { format, startOfDay } from "date-fns";
 import { fromZonedTime, toZonedTime } from "date-fns-tz";
+import { formatINR } from "@/utils/formatINR";
+import { ChevronRight } from "lucide-react";
+import Icon from "@/ui/Icon";
+import { formatInvoiceNo } from "@/utils/formatInvoiceNo";
+import { statusLabel } from "@/utils/statusLabel";
 
 const TIMEZONE = "Asia/Kolkata";
 
@@ -10,6 +15,7 @@ const statusStyles: Record<string, string> = {
   pending: "bg-surface text-ink-muted border-line-strong",
   "out for delivery": "bg-surface-raised text-field border-field/40",
   delivered: "bg-field-soft text-field border-field/30",
+  cancelled: "bg-danger/10 text-danger border-danger/30",
 };
 
 function StatusPill({ status }: { status?: string }) {
@@ -18,9 +24,9 @@ function StatusPill({ status }: { status?: string }) {
     "bg-surface text-ink-muted border-line";
   return (
     <span
-      className={`inline-block whitespace-nowrap capitalize text-xs font-medium px-2.5 py-1 rounded-sm border ${style}`}
+      className={`inline-block whitespace-nowrap text-xs font-medium px-2.5 py-1 rounded-sm border ${style}`}
     >
-      {status || "No status"}
+      {statusLabel(status) || "No status"}
     </span>
   );
 }
@@ -80,7 +86,6 @@ const quickLinks = [
   },
 ];
 
-const rupees = (n: number) => `₹${n.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 export default async function Dashboard() {
   const supabase = await createClient();
@@ -156,7 +161,7 @@ export default async function Dashboard() {
         <StatCard
           label="Orders today"
           value={todayOrders.length}
-          hint={`${rupees(todayValue)} order value`}
+          hint={`${formatINR(todayValue)} order value`}
           href="/admin/orders"
         />
         <StatCard
@@ -198,8 +203,8 @@ export default async function Dashboard() {
                   key={order.id}
                   className="flex items-center gap-3 px-5 py-3 min-w-0"
                 >
-                  <span className="text-sm font-medium text-ink-muted w-12 flex-shrink-0">
-                    #{order.invoice_id}
+                  <span className="text-sm font-medium text-ink-muted font-mono tabular-nums whitespace-nowrap w-32 flex-shrink-0">
+                    {formatInvoiceNo(order.invoice_id, order.created_at) ?? "—"}
                   </span>
                   <span className="flex-1 min-w-0">
                     <span className="block text-sm font-medium text-ink truncate">
@@ -213,7 +218,7 @@ export default async function Dashboard() {
                     </span>
                   </span>
                   <span className="text-sm font-semibold text-ink font-mono tabular-nums flex-shrink-0">
-                    {rupees(Number(order.amount) || 0)}
+                    {formatINR(order.amount)}
                   </span>
                   <span className="hidden sm:block w-32 flex-shrink-0 text-right">
                     <StatusPill status={order.delivery_status} />
@@ -246,20 +251,7 @@ export default async function Dashboard() {
                   {link.description}
                 </span>
               </span>
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="flex-shrink-0 text-ink-muted group-hover:text-field transition-colors"
-                aria-hidden
-              >
-                <path d="M9 18l6-6-6-6" />
-              </svg>
+              <Icon icon={ChevronRight} className="text-ink flex-shrink-0" />
             </Link>
           ))}
         </div>

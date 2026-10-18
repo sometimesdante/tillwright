@@ -6,6 +6,7 @@ import AddedCard from "../AddedCard";
 import Link from "next/link";
 import { siteConfig } from "@/utils/siteConfig";
 import { useEffect, useRef } from "react";
+import { formatINR } from "@/utils/formatINR";
 
 export default function CartPanel() {
   const cartOpen = useCartStore((state) => state.cartOpen);
@@ -61,7 +62,7 @@ export default function CartPanel() {
         >
           Request new item
         </Link>
-        <p className="text-sm font-medium">Total: <span className="font-mono tabular-nums">₹{Number(totalPrice).toFixed(2)}</span></p>
+        <p className="text-sm font-medium">Total: <span className="font-mono tabular-nums">{formatINR(totalPrice)}</span></p>
         {totalItems > 0 && (
           <span className="flex justify-between gap-2">
             <button

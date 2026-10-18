@@ -1,8 +1,8 @@
 "use client";
 
 import useCartStore from "@/store/cartStore";
-import Image from "next/image";
-import CartIcon from "@/../public/icons/cart.png";
+import { ShoppingCart } from "lucide-react";
+import Icon from "@/ui/Icon";
 
 const Cart = () => {
   const totalItems = useCartStore((state) => state.totalItems);
@@ -17,9 +17,9 @@ const Cart = () => {
         data-cart-toggle
         className="flex gap-2 items-center text-slate-200 bg-slate-600 rounded-md px-4 font-semibold py-2"
       >
-        {cartOpen ? "Hide Cart" : "View Cart"}{" "}
+        {cartOpen ? "Hide cart" : "View cart"}{" "}
         {totalItems > 0 ? `(${totalItems})` : null}
-        <Image src={CartIcon} width={18} height={18} alt="" />
+        <Icon icon={ShoppingCart} />
       </button>
     </div>
   );

@@ -17,6 +17,7 @@ import {
   primaryButtonClass,
   secondaryButtonClass,
 } from "../AdminForm";
+import { formatAmount } from "@/utils/formatINR";
 
 const toWords = new ToWords({
   localeCode: "en-IN",
@@ -49,15 +50,13 @@ function OrderItems({ products }: { products: any[] }) {
         <span key={item.id} className="w-full flex justify-between font-mono tabular-nums">
           <p className="w-64">{item.name}</p>
           <p className="w-24 px-1">{item.count}</p>
-          <p className="w-32 px-1">{item.mrp}</p>
-          <p className="w-32 px-1">{item.pretax}</p>
+          <p className="w-32 px-1">{formatAmount(item.mrp)}</p>
+          <p className="w-32 px-1">{formatAmount(item.pretax)}</p>
           <p className="w-32 px-1">{item.tax}</p>
           <p className="w-32 px-1">
-            {((Number(item.price) - Number(item.pretax)) * item.count).toFixed(
-              2,
-            )}
+            {formatAmount((Number(item.price) - Number(item.pretax)) * item.count)}
           </p>
-          <p className="w-32 px-1">{item.price * item.count}</p>
+          <p className="w-32 px-1">{formatAmount(item.price * item.count)}</p>
         </span>
       ))}
     </span>
@@ -69,12 +68,12 @@ const Template = ({ transaction }: { transaction: CustomOrder | null }) => {
     <div className="h-full flex flex-col justify-between px-6 pt-12 pb-6">
       <div className="">
         <h3 className="font-semibold text-xl">
-          Invoice Bill No.{" "}
+          Invoice no.{" "}
           <span className="font-mono tabular-nums">{transaction?.invoice_id}</span>
         </h3>
         <div className="flex flex-row">
           <div className="w-1/2">
-            <h5>Sold by:</h5>
+            <h5>Sold by</h5>
             <p className="font-semibold text-lg">{siteConfig.legalName}</p>
             <div className="mt-4">
               {siteConfig.registrations.map((registration) => (
@@ -106,17 +105,17 @@ const Template = ({ transaction }: { transaction: CustomOrder | null }) => {
             <p className="w-64 font-semibold">Name</p>
             <p className="w-24 px-1 font-semibold">Qty</p>
             <p className="w-32 px-1 font-semibold">MRP</p>
-            <p className="w-32 px-1 font-semibold">Unit Price</p>
-            <p className="w-32 px-1 font-semibold">Tax Rate</p>
-            <p className="w-32 px-1 font-semibold">Tax Amt</p>
-            <p className="w-32 px-1 font-semibold">Total Amt</p>
+            <p className="w-32 px-1 font-semibold">Unit price</p>
+            <p className="w-32 px-1 font-semibold">GST %</p>
+            <p className="w-32 px-1 font-semibold">GST</p>
+            <p className="w-32 px-1 font-semibold">Total</p>
           </span>
           <span className="my-4">
             <OrderItems products={transaction?.products} />
           </span>
           <span className="my-4">
             <p className="mt-4">
-              <span className="font-semibold">Item Quantity</span>{" "}
+              <span className="font-semibold">Item quantity</span>{" "}
               {transaction?.products.reduce(
                 (sum: number, num: any) => sum + num.count,
                 0,
@@ -124,8 +123,8 @@ const Template = ({ transaction }: { transaction: CustomOrder | null }) => {
             </p>
             <p className="flex justify-between">
               <span>
-                <span className="font-semibold">Sum Total: </span>
-                <span className="font-mono tabular-nums">Rs. {transaction?.amount}</span>*{" "}
+                <span className="font-semibold">Total: </span>
+                <span className="font-mono tabular-nums">Rs. {formatAmount(transaction?.amount)}</span>*{" "}
               </span>
             </p>
             <p className="mt-4">
@@ -137,7 +136,7 @@ const Template = ({ transaction }: { transaction: CustomOrder | null }) => {
       </div>
       <div>
         <h4 className="w-full text-center">
-          Thank you for your order, please visit again!
+          Thank you for your order.
         </h4>
       </div>
     </div>
@@ -221,7 +220,7 @@ export default function CustomInvoice() {
       } else {
         await generatePDF(transaction);
         toast.success(
-          "Please wait, your Invoice is getting ready for download!",
+          "Preparing your invoice. The download starts in a few seconds.",
           {
             position: "bottom-left",
             autoClose: 2000,

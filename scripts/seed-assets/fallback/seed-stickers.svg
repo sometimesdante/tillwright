@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200">
+  <rect width="1200" height="1200" fill="#F3F5EE"/>
+  <g font-family="Helvetica, Arial, sans-serif" font-weight="700" text-anchor="middle">
+    <!-- each sticker: white die-cut border, then the art -->
+    <g transform="rotate(-8 360 360)">
+      <rect x="190" y="230" width="340" height="260" rx="40" fill="#FFFFFF"/>
+      <rect x="206" y="246" width="308" height="228" rx="28" fill="#1F4D36"/>
+      <text x="360" y="385" font-size="96" fill="#F3F5EE">&lt;/&gt;</text>
+    </g>
+    <g transform="rotate(10 830 360)">
+      <circle cx="830" cy="360" r="170" fill="#FFFFFF"/>
+      <circle cx="830" cy="360" r="152" fill="#E9B949"/>
+      <text x="830" y="345" font-size="46" fill="#22201B">works on</text>
+      <text x="830" y="400" font-size="46" fill="#22201B">my machine</text>
+    </g>
+    <g transform="rotate(6 360 820)">
+      <rect x="160" y="700" width="400" height="230" rx="115" fill="#FFFFFF"/>
+      <rect x="176" y="716" width="368" height="198" rx="99" fill="#22201B"/>
+      <text x="360" y="838" font-size="58" fill="#E9B949">git push</text>
+    </g>
+    <g transform="rotate(-12 840 820)">
+      <rect x="680" y="660" width="320" height="320" rx="56" fill="#FFFFFF"/>
+      <rect x="696" y="676" width="288" height="288" rx="44" fill="#4A3324"/>
+      <text x="840" y="800" font-size="52" fill="#F3F5EE">LGTM</text>
+      <text x="840" y="870" font-size="38" fill="#E9B949">ship it</text>
+    </g>
+  </g>
+  <text x="600" y="1110" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="34" fill="#22201B" letter-spacing="1">Tillwright Supply</text>
+</svg>

@@ -4,6 +4,7 @@ import { createClient } from "@/utils/supabase/server";
 import { fetchTransaction } from "@/utils/functions/fetchTransaction";
 import { handleWhatsapp } from "@/utils/functions/handleWhatsapp";
 import { handleDispatchWhatsapp } from "@/utils/functions/handleDispatchWhatsapp";
+import { formatInvoiceNo } from "@/utils/formatInvoiceNo";
 
 // Server actions so the WhatsApp token never reaches the browser.
 // Order details are looked up here rather than trusted from the client.
@@ -12,7 +13,12 @@ export async function notifyOrderPlaced(transaction_id: string) {
   const order = await fetchTransaction(transaction_id);
   if (!order) return;
 
-  await handleWhatsapp(order.phone, order.name, order.invoice_id, "tomorrow");
+  await handleWhatsapp(
+    order.phone,
+    order.name,
+    formatInvoiceNo(order.invoice_id, order.created_at) ?? "",
+    "tomorrow",
+  );
 }
 
 export async function notifyOrderDispatched(id: string) {
@@ -34,5 +40,9 @@ export async function notifyOrderDispatched(id: string) {
     .single();
   if (!order) return;
 
-  await handleDispatchWhatsapp(order.phone, order.name, order.invoice_id);
+  await handleDispatchWhatsapp(
+    order.phone,
+    order.name,
+    formatInvoiceNo(order.invoice_id, order.created_at) ?? "",
+  );
 }

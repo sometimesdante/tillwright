@@ -6,6 +6,9 @@ import ExportOrders from "@/ui/ExportOrders";
 import { format } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import CustomInvoice from "@/ui/CustomInvoice";
+import { formatINR } from "@/utils/formatINR";
+import { formatInvoiceNo } from "@/utils/formatInvoiceNo";
+import { statusLabel } from "@/utils/statusLabel";
 
 function OrderItems({ products }: { products: any[] }) {
   if (!Array.isArray(products)) {
@@ -29,15 +32,15 @@ function PaymentPill({ status }: { status?: string }) {
     value === "paid"
       ? "bg-field-soft text-field border-field/30"
       : value === "cod"
-        ? "bg-violet-50 text-violet-700 border-violet-200"
-        : "bg-surface text-ink-muted border-line";
+        ? "bg-surface-raised text-ink border-line-strong"
+        : value === "cancelled"
+          ? "bg-danger/10 text-danger border-danger/30"
+          : "bg-surface text-ink-muted border-line";
   return (
     <span
-      className={`inline-block whitespace-nowrap text-xs font-medium px-2.5 py-1 rounded-sm border ${style} ${
-        value === "cod" ? "uppercase" : "capitalize"
-      }`}
+      className={`inline-block whitespace-nowrap text-xs font-medium px-2.5 py-1 rounded-sm border ${style}`}
     >
-      {status || "Unknown"}
+      {statusLabel(status) || "Unknown"}
     </span>
   );
 }
@@ -46,8 +49,8 @@ function OrderRow(order: any) {
   const date = toZonedTime(order.created_at, "Asia/Kolkata");
   return (
     <tr className="align-top hover:bg-surface">
-      <td className="px-4 py-3 font-semibold text-ink whitespace-nowrap">
-        #{order.invoice_id}
+      <td className="px-4 py-3 font-semibold text-ink font-mono tabular-nums whitespace-nowrap">
+        {formatInvoiceNo(order.invoice_id, order.created_at) ?? "—"}
       </td>
       <td className="px-4 py-3 whitespace-nowrap">
         <span className="block text-ink">{format(date, "d MMM yyyy")}</span>
@@ -85,7 +88,7 @@ function OrderRow(order: any) {
         <OrderStatus id={order.id} />
       </td>
       <td className="px-4 py-3 text-right font-semibold text-ink font-mono tabular-nums whitespace-nowrap">
-        ₹{Number(order.amount || 0).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        {formatINR(order.amount)}
       </td>
       <td className="px-4 py-3 min-w-[14rem] max-w-sm">
         <OrderItems products={order.products} />

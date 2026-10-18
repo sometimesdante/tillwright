@@ -5,7 +5,7 @@ export default function Returns() {
 
   return (
     <div className="w-full md:w-1/2 mx-auto">
-      <h1 className="text-3xl">Cancellation and Refunds</h1>
+      <h1 className="text-3xl">Cancellation and refunds</h1>
       <p>Last updated: {policies.lastUpdated}</p>
       <p>
         We want you to be happy with every order from {siteConfig.name}. If
@@ -13,7 +13,7 @@ export default function Returns() {
         order, report a problem or request a refund.
       </p>
 
-      <h2>Cancelling an Order</h2>
+      <h2>Cancelling an order</h2>
       <p>
         You can cancel an order at any time before it is dispatched. Contact us
         at {siteConfig.email} or {siteConfig.phone} with your order number, and
@@ -46,7 +46,7 @@ export default function Returns() {
         to pay for return shipping on damaged or incorrect items.
       </p>
 
-      <h2>Returning Other Items</h2>
+      <h2>Returning other items</h2>
       <p>
         If you have changed your mind about a product, you can request a return
         within {policies.returnWindow}. To be eligible, the item must be unused,
@@ -57,7 +57,7 @@ export default function Returns() {
         incorrect: {policies.nonReturnable}.
       </p>
 
-      <h2>How to Request a Return</h2>
+      <h2>How to request a return</h2>
       <ol>
         <li>
           Email {siteConfig.email} with your order number and the items you
@@ -91,7 +91,7 @@ export default function Returns() {
         bank first, then contact us and we will help you track it.
       </p>
 
-      <h2>Contact Us</h2>
+      <h2>Contact us</h2>
       <p>
         For any questions about cancellations, returns or refunds, contact us
         at {siteConfig.email} or {siteConfig.phone} ({siteConfig.supportHours}).

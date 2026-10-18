@@ -11,6 +11,8 @@ import "react-toastify/dist/ReactToastify.css";
 import { SITE_URL } from "@/utils/siteUrl";
 import { PDF_HEAD } from "@/utils/pdfHead";
 import { siteConfig } from "@/utils/siteConfig";
+import { formatAmount } from "@/utils/formatINR";
+import { formatInvoiceNo } from "@/utils/formatInvoiceNo";
 
 interface GenerateBillProps {
   id: string | number;
@@ -47,15 +49,13 @@ function OrderItems({ products }: { products: any[] }) {
         <span key={item.id} className="w-full flex justify-between font-mono tabular-nums">
           <p className="w-64">{item.name}</p>
           <p className="w-24 px-1">{item.count}</p>
-          <p className="w-32 px-1">{item.mrp}</p>
-          <p className="w-32 px-1">{item.pretax}</p>
+          <p className="w-32 px-1">{formatAmount(item.mrp)}</p>
+          <p className="w-32 px-1">{formatAmount(item.pretax)}</p>
           <p className="w-32 px-1">{item.tax}</p>
           <p className="w-32 px-1">
-            {((Number(item.price) - Number(item.pretax)) * item.count).toFixed(
-              2,
-            )}
+            {formatAmount((Number(item.price) - Number(item.pretax)) * item.count)}
           </p>
-          <p className="w-32 px-1">{item.price * item.count}</p>
+          <p className="w-32 px-1">{formatAmount(item.price * item.count)}</p>
         </span>
       ))}
     </span>
@@ -79,12 +79,14 @@ const Template = ({ transaction }: { transaction: Order | null }) => {
     <div className="h-full flex flex-col justify-between px-6 pt-12 pb-6">
       <div className="">
         <h3 className="font-semibold text-xl">
-          Invoice Bill No.{" "}
-          <span className="font-mono tabular-nums">{transaction?.invoice_id}</span>
+          Invoice{" "}
+          <span className="font-mono tabular-nums">
+            {formatInvoiceNo(transaction?.invoice_id, transaction?.created_at)}
+          </span>
         </h3>
         <div className="flex flex-row">
           <div className="w-1/2">
-            <h5>Sold by:</h5>
+            <h5>Sold by</h5>
             <p className="font-semibold text-lg">{siteConfig.legalName}</p>
             <div className="mt-4">
               {siteConfig.registrations.map((registration) => (
@@ -111,7 +113,7 @@ const Template = ({ transaction }: { transaction: Order | null }) => {
             </p>
           </div>
           <div className="w-1/2">
-            <h5>Customer Details:</h5>
+            <h5>Customer</h5>
             <p className="font-semibold text-lg">{transaction?.name}</p>
             <p className="mt-4">
               <span className="font-semibold">Phone:</span> {transaction?.phone}
@@ -130,17 +132,17 @@ const Template = ({ transaction }: { transaction: Order | null }) => {
             <p className="w-64 font-semibold">Name</p>
             <p className="w-24 px-1 font-semibold">Qty</p>
             <p className="w-32 px-1 font-semibold">MRP</p>
-            <p className="w-32 px-1 font-semibold">Unit Price</p>
-            <p className="w-32 px-1 font-semibold">Tax Rate</p>
-            <p className="w-32 px-1 font-semibold">Tax Amt</p>
-            <p className="w-32 px-1 font-semibold">Total Amt</p>
+            <p className="w-32 px-1 font-semibold">Unit price</p>
+            <p className="w-32 px-1 font-semibold">GST %</p>
+            <p className="w-32 px-1 font-semibold">GST</p>
+            <p className="w-32 px-1 font-semibold">Total</p>
           </span>
           <span className="my-4">
             <OrderItems products={transaction?.products} />
           </span>
           <span className="my-4">
             <p className="mt-4">
-              <span className="font-semibold">Item Quantity</span>{" "}
+              <span className="font-semibold">Item quantity</span>{" "}
               {transaction?.products.reduce(
                 (sum: number, num: any) => sum + num.count,
                 0,
@@ -148,11 +150,11 @@ const Template = ({ transaction }: { transaction: Order | null }) => {
             </p>
             <p className="flex justify-between">
               <span>
-                <span className="font-semibold">Sum Total: </span>
-                <span className="font-mono tabular-nums">Rs. {transaction?.amount}</span>*{" "}
+                <span className="font-semibold">Total: </span>
+                <span className="font-mono tabular-nums">Rs. {formatAmount(transaction?.amount)}</span>*{" "}
               </span>
               <span className="text-xl font-semibold">
-                You saved <span className="font-mono tabular-nums">Rs. {difference}</span>
+                You saved <span className="font-mono tabular-nums">Rs. {formatAmount(difference)}</span>
               </span>
             </p>
             <p className="mt-4">
@@ -164,7 +166,7 @@ const Template = ({ transaction }: { transaction: Order | null }) => {
       </div>
       <div>
         <h4 className="w-full text-center">
-          Thank you for your order, please visit again!
+          Thank you for your order.
         </h4>
         <div className="flex justify-between">
           <p>
@@ -173,7 +175,7 @@ const Template = ({ transaction }: { transaction: Order | null }) => {
             <span className="font-mono tabular-nums">{transaction?.transaction_id}</span>
           </p>
           <p>
-            <span className="font-semibold">Date and Time</span>
+            <span className="font-semibold">Date and time</span>
             <br />
             {format(
               toZonedTime(transaction?.created_at, "Asia/Kolkata"),
@@ -181,10 +183,10 @@ const Template = ({ transaction }: { transaction: Order | null }) => {
             )}
           </p>
           <p>
-            <span className="font-semibold">Mode of Payment</span>
+            <span className="font-semibold">Payment</span>
             <br />
             {transaction?.payment_status == "cod"
-              ? "Cash on Delivery"
+              ? "Cash on delivery"
               : "Online"}
           </p>
         </div>
@@ -211,7 +213,7 @@ export default function GenerateBill({ id }: GenerateBillProps) {
       } else {
         generatePDF(data);
         toast.success(
-          "Please wait, your Invoice is getting ready for download!",
+          "Preparing your invoice. The download starts in a few seconds.",
           {
             position: "bottom-left",
             autoClose: 2000,
@@ -254,7 +256,7 @@ export default function GenerateBill({ id }: GenerateBillProps) {
       const blob = await response.blob();
       const link = document.createElement("a");
       link.href = window.URL.createObjectURL(blob);
-      link.download = `Invoice No.${transactionData.invoice_id}.pdf`;
+      link.download = `${formatInvoiceNo(transactionData.invoice_id, transactionData.created_at)}.pdf`;
       link.click();
     } else {
       console.error("Failed to generate PDF");

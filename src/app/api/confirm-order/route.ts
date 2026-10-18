@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
     const { data, error } = await resend.emails.send({
       from: siteConfig.emailFrom,
       to: [CurrentTransaction.email],
-      subject: "Your order has been confirmed!",
+      subject: "Your order is confirmed",
       react: OrderConfirmationTemplate({
         firstName: CurrentTransaction?.email,
       }),

@@ -53,7 +53,7 @@ export default function GalleryDashboard() {
                 <div className="bg-black p-1 w-2 h-2 rounded-md"></div>
                 <div className="bg-black p-1 w-2 h-2 rounded-md"></div>
               </span>
-              <Image src={f.url} width={256} height={256} alt={f.name} className="w-full aspect-square" />
+              <Image loading="eager" src={f.url} width={256} height={256} alt={f.name} className="w-full aspect-square" />
             </div>
             <div className="m-4">
               <p className="text-lg">{(f.name).slice(0, -5)}</p>

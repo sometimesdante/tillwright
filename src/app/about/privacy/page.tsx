@@ -5,7 +5,7 @@ export default function Privacy() {
 
   return (
     <div className="w-full md:w-1/2 mx-auto">
-      <h1 className="text-3xl">Privacy Policy</h1>
+      <h1 className="text-3xl">Privacy policy</h1>
       <p>Last updated: {policies.lastUpdated}</p>
       <p>
         This Privacy Policy explains how {siteConfig.legalName} (&quot;we&quot;,
@@ -24,7 +24,7 @@ export default function Privacy() {
         the practices described here.
       </p>
 
-      <h2>Information We Collect</h2>
+      <h2>Information we collect</h2>
       <h3>Information you give us</h3>
       <ul>
         <li>
@@ -59,7 +59,7 @@ export default function Privacy() {
         along with a transaction reference.
       </p>
 
-      <h2>How We Use Your Information</h2>
+      <h2>How we use your information</h2>
       <ul>
         <li>To create and manage your account.</li>
         <li>To process, deliver and support your orders.</li>
@@ -77,7 +77,7 @@ export default function Privacy() {
         receive them, and you can opt out at any time.
       </p>
 
-      <h2>Who We Share Your Information With</h2>
+      <h2>Who we share your information with</h2>
       <p>
         We do not sell your personal data. We share it only with the service
         providers we rely on to run the store, and only as much as they need:
@@ -127,7 +127,7 @@ export default function Privacy() {
         them.
       </p>
 
-      <h2>How Long We Keep Your Information</h2>
+      <h2>How long we keep your information</h2>
       <p>
         We keep your account information for as long as your account is
         active. Order and invoice records are kept for as long as required by
@@ -135,7 +135,7 @@ export default function Privacy() {
         no longer needed, we delete or anonymise it.
       </p>
 
-      <h2>Your Rights</h2>
+      <h2>Your rights</h2>
       <p>You have the right to:</p>
       <ul>
         <li>access a summary of the personal data we hold about you,</li>
@@ -172,14 +172,14 @@ export default function Privacy() {
         it.
       </p>
 
-      <h2>Links to Other Websites</h2>
+      <h2>Links to other websites</h2>
       <p>
         The Website may link to websites we do not operate. We are not
         responsible for their content or privacy practices, so please review
         their privacy policies.
       </p>
 
-      <h2>Changes to This Policy</h2>
+      <h2>Changes to this policy</h2>
       <p>
         We may update this Privacy Policy from time to time. Changes will be
         posted on this page with a new &quot;Last updated&quot; date. If we make
@@ -187,7 +187,7 @@ export default function Privacy() {
         Website.
       </p>
 
-      <h2>Grievance Officer</h2>
+      <h2>Grievance officer</h2>
       <p>
         If you have concerns about how your personal data is handled, you can
         contact our Grievance Officer:
@@ -198,7 +198,7 @@ export default function Privacy() {
         <li>Phone: {grievanceOfficer.phone}</li>
       </ul>
 
-      <h2>Contact Us</h2>
+      <h2>Contact us</h2>
       <p>If you have any questions about this Privacy Policy, contact us:</p>
       <ul>
         <li>By email: {siteConfig.email}</li>

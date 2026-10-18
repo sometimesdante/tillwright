@@ -7,6 +7,7 @@ import { adminInputClass } from "@/ui/AdminForm";
 import { createClient } from "@/utils/supabase/client";
 import { Product } from "@/utils/types";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { formatINR } from "@/utils/formatINR";
 
 type StockFilter = "all" | "in" | "out";
 
@@ -17,9 +18,7 @@ const stockFilters: { value: StockFilter; label: string }[] = [
 ];
 
 const money = (value?: number | string) =>
-  value === undefined || value === null || value === ""
-    ? "—"
-    : `₹${Number(value).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  value === undefined || value === null || value === "" ? "—" : formatINR(value);
 
 export default function ProductsDashboard() {
   const supabase = createClient();
@@ -156,7 +155,7 @@ export default function ProductsDashboard() {
                         <img
                           src={String(product.image_url).trimEnd()}
                           alt=""
-                          loading="lazy"
+                          loading="eager"
                           className="w-10 h-10 rounded-md object-cover bg-surface flex-shrink-0"
                         />
                       ) : (

@@ -23,6 +23,8 @@ import {
   primaryButtonClass,
   secondaryButtonClass,
 } from "../AdminForm";
+import { formatAmount } from "@/utils/formatINR";
+import { formatInvoiceNo } from "@/utils/formatInvoiceNo";
 
 const Template = ({
   ordersList,
@@ -57,18 +59,18 @@ const Template = ({
             alt={`${siteConfig.name} logo`}
           />
           <h4 className="font-semibold">
-            Sales Report From {start.slice(3)} to {end.slice(3)}
+            Sales report, {start.slice(3)} to {end.slice(3)}
           </h4>
         </span>
       </div>
       <div>
         <span className="flex items-start border-2 bg-white py-1 -mb-1">
-          <p className="w-12 px-2 font-semibold">ID</p>
-          <p className="w-44 px-1 font-semibold">Order Date</p>
-          <p className="w-60 px-1 font-semibold">Customer Name</p>
+          <p className="w-36 px-2 font-semibold">Invoice</p>
+          <p className="w-44 px-1 font-semibold">Order date</p>
+          <p className="w-60 px-1 font-semibold">Customer</p>
           <p className="w-32 px-1 font-semibold">Phone</p>
           <p className="w-24 px-1 font-semibold">Tax</p>
-          <p className="w-40 px-1 font-semibold">Order Amount</p>
+          <p className="w-40 px-1 font-semibold">Amount (Rs.)</p>
         </span>
       </div>
       <div>
@@ -79,7 +81,9 @@ const Template = ({
                 key={order.id}
                 className="flex items-start border-2 bg-white py-1 -mb-1"
               >
-                <p className="w-12 px-2 font-mono tabular-nums">{order.invoice_id}</p>
+                <p className="w-36 px-2 font-mono tabular-nums">
+                  {formatInvoiceNo(order.invoice_id, order.created_at)}
+                </p>
                 <p className="w-44 px-1">
                   {format(
                     toZonedTime(order.created_at, "Asia/Kolkata"),
@@ -89,16 +93,16 @@ const Template = ({
                 <p className="w-60 px-1">{order.name}</p>
                 <p className="w-32 px-1">{order.phone}</p>
                 <p className="w-24 px-1 font-mono tabular-nums">
-                  {order.products
-                    .reduce(
+                  {formatAmount(
+                    order.products.reduce(
                       (sum: number, item: any) =>
                         sum +
                         (Number(item.price) - Number(item.pretax)) * item.count,
                       0
-                    )
-                    .toFixed(2)}
+                    ),
+                  )}
                 </p>
-                <p className="w-40 px-1 font-mono tabular-nums">{order.amount}</p>
+                <p className="w-40 px-1 font-mono tabular-nums">{formatAmount(order.amount)}</p>
               </span>
             );
           })
@@ -110,12 +114,12 @@ const Template = ({
       </div>
       <div>
         <span className="flex items-start border-2 bg-white py-1 mt-4">
-          <p className="w-12 px-2 font-semibold">Total</p>
+          <p className="w-36 px-2 font-semibold">Total</p>
           <p className="w-44 px-1"></p>
           <p className="w-60 px-1"></p>
           <p className="w-32 px-1"></p>
-          <p className="w-24 px-1 font-mono tabular-nums">{totalTax.toFixed(2)}</p>
-          <p className="w-40 px-1 font-mono tabular-nums">{totalAmount.toFixed(2)}</p>
+          <p className="w-24 px-1 font-mono tabular-nums">{formatAmount(totalTax)}</p>
+          <p className="w-40 px-1 font-mono tabular-nums">{formatAmount(totalAmount)}</p>
         </span>
       </div>
     </div>
@@ -215,7 +219,7 @@ export default function ExportOrders() {
         setErrorMessage("");
         generatePDF(orders, startDate.toDateString(), endDate.toDateString());
         toast.success(
-          "Please wait, your Products List is getting ready for download!",
+          "Preparing the orders report. The download starts in a few seconds.",
           {
             position: "bottom-left",
             autoClose: 2000,

@@ -10,6 +10,8 @@ import {
   primaryButtonClass,
   secondaryButtonClass,
 } from "../AdminForm";
+import { Plus } from "lucide-react";
+import Icon from "@/ui/Icon";
 
 export default function AddProduct({
   onProductAdd,
@@ -60,6 +62,7 @@ export default function AddProduct({
     const data = {
       name: formData.get("name") as string,
       category: formData.get("category") as string,
+      description: (formData.get("description") as string) || null,
       purchase: formData.get("purchase"),
       mrp: formData.get("mrp") as string,
       pretax: formData.get("special") as string,
@@ -74,6 +77,7 @@ export default function AddProduct({
       const { error } = await supabase.from("products").insert({
         name: data.name,
         category: data.category,
+        description: data.description,
         purchase: data.purchase,
         mrp: data.mrp,
         pretax: data.pretax,
@@ -105,18 +109,7 @@ export default function AddProduct({
         onClick={() => setShowFields(true)}
         className={primaryButtonClass}
       >
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          aria-hidden
-        >
-          <path d="M12 5v14M5 12h14" />
-        </svg>
+        <Icon icon={Plus} />
         Add product
       </button>
       {showFields && (
@@ -127,7 +120,7 @@ export default function AddProduct({
                 type="text"
                 name="name"
                 id="add-name"
-                placeholder="Some Product Name"
+                placeholder="Ceramic mug, 350 ml"
                 className={adminInputClass}
                 required
               />
@@ -141,6 +134,15 @@ export default function AddProduct({
                 defaultValue="Others"
                 className={adminInputClass}
                 required
+              />
+            </AdminField>
+            <AdminField label="Description" htmlFor="add-description">
+              <textarea
+                name="description"
+                id="add-description"
+                rows={3}
+                placeholder="Material, size, weight, care"
+                className={adminInputClass}
               />
             </AdminField>
             <div className="grid grid-cols-2 gap-4">

@@ -2,6 +2,8 @@
 import { useEffect, useRef, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { notifyOrderDispatched } from "@/utils/functions/whatsappActions";
+import { ChevronDown } from "lucide-react";
+import Icon from "@/ui/Icon";
 
 const statuses = [
   {
@@ -18,6 +20,11 @@ const statuses = [
     value: "delivered",
     label: "Delivered",
     style: "bg-field-soft text-field border-field/30",
+  },
+  {
+    value: "cancelled",
+    label: "Cancelled",
+    style: "bg-danger/10 text-danger border-danger/30",
   },
 ];
 
@@ -100,19 +107,7 @@ export default function OrderStatus({ id }: any) {
         }`}
       >
         {current?.label ?? "No status"}
-        <svg
-          width="12"
-          height="12"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden
-        >
-          <path d="M6 9l6 6 6-6" />
-        </svg>
+        <Icon icon={ChevronDown} size={16} />
       </button>
       {clickStatus && (
         <span

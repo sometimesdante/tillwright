@@ -1,31 +1,17 @@
-import Image, { StaticImageData } from "next/image";
+import Image from "next/image";
 import Link from "next/link";
 import { logout } from "@/app/auth/actions";
 import { siteConfig } from "@/utils/siteConfig";
+import { Images, LayoutDashboard, LogOut, Package, ReceiptText } from "lucide-react";
+import Icon from "@/ui/Icon";
 
-import Dashboard from "@/../public/icons/admin/dashboard.png";
-import Orders from "@/../public/icons/admin/orders.png";
-import Products from "@/../public/icons/admin/products.png";
-import Gallery from "@/../public/icons/admin/gallery.png";
-import Logout from "@/../public/icons/logout.png";
 
-// The icon PNGs are white, so use them as a mask over a brand-green fill.
-function SidebarIcon({ icon }: { icon: StaticImageData }) {
-  const mask = `url(${icon.src}) center / contain no-repeat`;
-  return (
-    <span
-      aria-hidden
-      className="block w-6 h-6 bg-field"
-      style={{ mask, WebkitMask: mask }}
-    />
-  );
-}
 
 const links = [
-  { href: "/admin", title: "Dashboard", icon: Dashboard },
-  { href: "/admin/orders", title: "Manage Orders", icon: Orders },
-  { href: "/admin/products", title: "Manage Products", icon: Products },
-  { href: "/admin/gallery", title: "Gallery", icon: Gallery },
+  { href: "/admin", title: "Dashboard", icon: LayoutDashboard },
+  { href: "/admin/orders", title: "Manage orders", icon: ReceiptText },
+  { href: "/admin/products", title: "Manage products", icon: Package },
+  { href: "/admin/gallery", title: "Gallery", icon: Images },
 ];
 
 export default function Sidebar() {
@@ -35,6 +21,7 @@ export default function Sidebar() {
         <div className="flex flex-col gap-4 items-center">
           <Link href="/" title="Home">
             <Image
+              loading="eager"
               src={siteConfig.logoPath}
               width={42}
               height={42}
@@ -50,7 +37,7 @@ export default function Sidebar() {
               aria-label={link.title}
               className="p-2 rounded-md hover:bg-field-soft transition-colors"
             >
-              <SidebarIcon icon={link.icon} />
+              <Icon icon={link.icon} className="text-field" />
             </Link>
           ))}
         </div>
@@ -61,7 +48,7 @@ export default function Sidebar() {
             title="Logout"
             aria-label="Logout"
           >
-            <SidebarIcon icon={Logout} />
+            <Icon icon={LogOut} className="text-field" />
           </button>
         </div>
       </div>

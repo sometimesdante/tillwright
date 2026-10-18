@@ -6,7 +6,7 @@ export default function Terms() {
 
   return (
     <div className="w-full md:w-1/2 mx-auto">
-      <h1 className="text-3xl">Terms and Conditions</h1>
+      <h1 className="text-3xl">Terms and conditions</h1>
       <p>Last updated: {policies.lastUpdated}</p>
       <p>
         These Terms and Conditions (&quot;Terms&quot;) govern your use of{" "}
@@ -31,7 +31,7 @@ export default function Terms() {
         confirm that you meet these requirements.
       </p>
 
-      <h2>Your Account</h2>
+      <h2>Your account</h2>
       <ul>
         <li>
           You are responsible for keeping your account details accurate and up
@@ -47,7 +47,7 @@ export default function Terms() {
         </li>
       </ul>
 
-      <h2>Products and Pricing</h2>
+      <h2>Products and pricing</h2>
       <ul>
         <li>
           All prices are in Indian Rupees (INR) and include applicable taxes
@@ -66,7 +66,7 @@ export default function Terms() {
         <li>We may limit the quantity of any product available per order.</li>
       </ul>
 
-      <h2>Placing an Order</h2>
+      <h2>Placing an order</h2>
       <p>
         Placing an order is an offer to buy the products in your cart. Your
         order is accepted when we send you an order confirmation. We may
@@ -109,7 +109,7 @@ export default function Terms() {
         have agreed to receive them.
       </p>
 
-      <h2>Acceptable Use</h2>
+      <h2>Acceptable use</h2>
       <p>You agree not to:</p>
       <ul>
         <li>use the Website for any unlawful or fraudulent purpose,</li>
@@ -127,7 +127,7 @@ export default function Terms() {
         </li>
       </ul>
 
-      <h2>Intellectual Property</h2>
+      <h2>Intellectual property</h2>
       <p>
         All content on the Website, including text, images, logos and design,
         belongs to {siteConfig.legalName} or its licensors and is protected by
@@ -135,14 +135,14 @@ export default function Terms() {
         commercial purposes without our written permission.
       </p>
 
-      <h2>Links to Other Websites</h2>
+      <h2>Links to other websites</h2>
       <p>
         The Website may contain links to third-party websites, such as payment
         providers. We do not control these websites and are not responsible
         for their content, policies or practices.
       </p>
 
-      <h2>Limitation of Liability</h2>
+      <h2>Limitation of liability</h2>
       <p>
         To the fullest extent permitted by law, we are not liable for any
         indirect, incidental or consequential loss arising from your use of the
@@ -152,14 +152,14 @@ export default function Terms() {
         consumer under Indian law.
       </p>
 
-      <h2>Events Outside Our Control</h2>
+      <h2>Events outside our control</h2>
       <p>
         We are not responsible for delays or failures caused by events beyond
         our reasonable control, such as natural disasters, strikes, government
         restrictions, or outages at our payment or delivery partners.
       </p>
 
-      <h2>Governing Law and Disputes</h2>
+      <h2>Governing law and disputes</h2>
       <p>
         These Terms are governed by the laws of India. We encourage you to
         contact us first so we can try to resolve any dispute informally. If a
@@ -167,14 +167,14 @@ export default function Terms() {
         jurisdiction of the courts in {siteConfig.city}, {siteConfig.state}.
       </p>
 
-      <h2>Changes to These Terms</h2>
+      <h2>Changes to these terms</h2>
       <p>
         We may update these Terms from time to time. Changes will be posted on
         this page with a new &quot;Last updated&quot; date. Orders are governed
         by the Terms in place at the time the order was placed.
       </p>
 
-      <h2>Grievance Officer</h2>
+      <h2>Grievance officer</h2>
       <p>
         In line with the Consumer Protection (E-Commerce) Rules, 2020, you can
         raise complaints with our Grievance Officer. We acknowledge complaints
@@ -186,7 +186,7 @@ export default function Terms() {
         <li>Phone: {grievanceOfficer.phone}</li>
       </ul>
 
-      <h2>Contact Us</h2>
+      <h2>Contact us</h2>
       <p>If you have any questions about these Terms, contact us:</p>
       <ul>
         <li>By email: {siteConfig.email}</li>

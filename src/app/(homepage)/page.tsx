@@ -1,27 +1,18 @@
 "use client";
 
-import Image from "next/image";
-import SearchIcon from "@/../public/icons/search.png";
 import ProductCard from "@/ui/ProductCard";
 import { createClient } from "@/utils/supabase/client";
 import { Product } from "@/utils/types";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { ChevronLeft, ChevronRight, ChevronUp, Search } from "lucide-react";
+import Icon from "@/ui/Icon";
 
 function ChevronIcon({ direction }: { direction: "left" | "right" }) {
   return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="#334155"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden
-    >
-      <path d={direction === "left" ? "M15 18l-6-6 6-6" : "M9 18l6-6-6-6"} />
-    </svg>
+    <Icon
+      icon={direction === "left" ? ChevronLeft : ChevronRight}
+      className="text-ink"
+    />
   );
 }
 
@@ -144,13 +135,7 @@ export default function Home() {
       <div className="sticky top-[4.25rem] z-40 w-full bg-surface border-b border-line">
         <div className="default-margin flex flex-col md:flex-row gap-3 md:items-center py-3">
           <label className="w-full md:max-w-xs flex-shrink-0 flex items-center rounded-sm bg-surface-raised border border-line-strong focus-within:border-field h-[34px] px-3">
-            <Image
-              src={SearchIcon}
-              width={16}
-              height={16}
-              alt=""
-              className="flex-shrink-0 opacity-60"
-            />
+            <Icon icon={Search} className="flex-shrink-0 text-ink" />
             <input
               type="search"
               value={searchText}
@@ -251,6 +236,7 @@ export default function Home() {
                   price={product.price}
                   mrp={product.mrp}
                   category={product.category}
+                  description={product.description}
                   product={product}
                 />
               </div>
@@ -268,19 +254,7 @@ export default function Home() {
             className="inline-flex items-center gap-2 bg-surface-raised text-ink px-5 py-2.5 rounded-full shadow-float border-0"
             aria-label="Back to top"
           >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#6A6A6A"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden
-            >
-              <path d="M18 15l-6-6-6 6" />
-            </svg>
+            <Icon icon={ChevronUp} className="text-ink" />
             Back to top
           </button>
         </div>

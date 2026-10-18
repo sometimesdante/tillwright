@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200">
+  <rect width="1200" height="1200" fill="#F3F5EE"/>
+  <!-- body and sleeves -->
+  <path d="M430 300 Q600 250 770 300 L940 380 Q990 400 1000 460 L1030 820 Q1032 850 1000 852 L920 856 Q895 856 892 830 L870 560 L860 940 Q860 970 830 970 L370 970 Q340 970 340 940 L330 560 L308 830 Q305 856 280 856 L200 852 Q168 850 170 820 L200 460 Q210 400 260 380 Z" fill="#1F4D36"/>
+  <!-- hood -->
+  <path d="M470 300 Q600 180 730 300 Q700 420 600 430 Q500 420 470 300 Z" fill="#183d2b"/>
+  <path d="M520 312 Q600 250 680 312 Q660 380 600 386 Q540 380 520 312 Z" fill="#12301f"/>
+  <!-- drawstrings -->
+  <path d="M570 400 L560 560" stroke="#F3F5EE" stroke-width="10" stroke-linecap="round"/>
+  <path d="M630 400 L640 560" stroke="#F3F5EE" stroke-width="10" stroke-linecap="round"/>
+  <!-- pocket and cuffs -->
+  <path d="M450 760 L750 760 L790 900 L410 900 Z" fill="none" stroke="#183d2b" stroke-width="10" stroke-linejoin="round"/>
+  <rect x="345" y="935" width="510" height="35" rx="8" fill="#183d2b"/>
+  <!-- chest print -->
+  <text x="600" y="660" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="56" font-weight="700" fill="#E9B949" letter-spacing="2">ship it</text>
+  <text x="600" y="1080" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="34" fill="#22201B" letter-spacing="1">Tillwright Supply</text>
+</svg>

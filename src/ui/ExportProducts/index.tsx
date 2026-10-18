@@ -10,6 +10,9 @@ import { SITE_URL } from "@/utils/siteUrl";
 import { PDF_HEAD } from "@/utils/pdfHead";
 import { siteConfig } from "@/utils/siteConfig";
 import { secondaryButtonClass } from "../AdminForm";
+import { formatAmount } from "@/utils/formatINR";
+import { Download } from "lucide-react";
+import Icon from "@/ui/Icon";
 
 const Template = ({ products }: { products: Product[] }) => {
   return (
@@ -38,7 +41,7 @@ const Template = ({ products }: { products: Product[] }) => {
               <span className="w-12 border-2 px-1">{product.id}</span>
               <span className="w-72 border-2 px-1">{product.name}</span>
               <span className="w-40 border-2 px-1">{product.category}</span>
-              <span className="w-40 border-2 px-1 font-mono tabular-nums">Rs. {product.price}</span>
+              <span className="w-40 border-2 px-1 font-mono tabular-nums">Rs. {formatAmount(product.price)}</span>
             </div>
           ))}
       </div>
@@ -57,7 +60,7 @@ export default function ExportProducts() {
       .order("category", { ascending: true });
     generatePDF(data || []);
     toast.success(
-      "Please wait, your Products List is getting ready for download!",
+      "Preparing the products list. The download starts in a few seconds.",
       {
         position: "bottom-left",
         autoClose: 2000,
@@ -122,19 +125,7 @@ export default function ExportProducts() {
       onClick={fetchProducts}
       className={secondaryButtonClass}
     >
-      <svg
-        width="16"
-        height="16"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        aria-hidden
-      >
-        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />
-      </svg>
+      <Icon icon={Download} />
       Export PDF
     </button>
   );

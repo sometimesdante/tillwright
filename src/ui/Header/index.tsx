@@ -14,27 +14,17 @@ export default async function Header() {
       <div className="default-margin w-full flex justify-between items-center gap-2 min-w-0">
         <Link
           href="/"
-          className="flex flex-row items-center gap-2 md:gap-4 no-underline min-w-0 flex-1"
+          className="flex items-center no-underline min-w-0 flex-1"
         >
-          <div className="flex flex-shrink-0">
-            <Image
-              src={siteConfig.logoPath}
-              width={64}
-              height={64}
-              alt={`${siteConfig.name} logo`}
-              className="aspect-square w-6 h-6 md:w-9 md:h-9 block md:hidden"
-            />
-            <Image
-              src={siteConfig.logoPath}
-              width={64}
-              height={64}
-              alt={`${siteConfig.name} logo`}
-              className="aspect-square hidden md:block md:w-9 md:h-9"
-            />
-          </div>
-          <p className="no-underline font-display font-semibold text-ink text-lg md:text-2xl tracking-tight truncate min-w-0">
-            {siteConfig.name}
-          </p>
+          {/* Wordmark is 267 × 64: 24px tall on phones, 36px from md up. */}
+          <Image
+            loading="eager"
+            src={siteConfig.wordmarkPath}
+            width={267}
+            height={64}
+            alt={siteConfig.name}
+            className="h-6 w-auto md:h-9 flex-shrink-0"
+          />
         </Link>
 
         <div className="flex-shrink-0">

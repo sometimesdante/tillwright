@@ -155,7 +155,7 @@ const useCartStore = create(
           totalPrice: InitialState.totalPrice,
         }));
 
-        toast.success("Your cart is empty again!", {
+        toast.success("Your cart is empty.", {
           position: "bottom-left",
           autoClose: 2000,
           hideProgressBar: false,

@@ -13,19 +13,34 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // chromium-min's major version must match the Chrome that puppeteer-core
-    // targets (puppeteer-core 25.11 → Chrome 153). Upgrade them together.
-    const browser = await puppeteer.launch({
-      args: await puppeteer.defaultArgs({
-        args: [...chromium.args, "--hide-scrollbars", "--disable-web-security"],
-        headless: "shell",
-      }),
-      defaultViewport: { width: 1920, height: 1080 },
-      executablePath: await chromium.executablePath(
-        `https://github.com/Sparticuz/chromium/releases/download/v153.0.0/chromium-v153.0.0-pack.x64.tar`
-      ),
-      headless: "shell",
-    });
+    // The Sparticuz build is Linux-only (Vercel, Lambda). For local work on
+    // Windows or macOS, set CHROME_EXECUTABLE_PATH to an installed Chrome.
+    const localChrome = process.env.CHROME_EXECUTABLE_PATH;
+    const browser = localChrome
+      ? await puppeteer.launch({
+          executablePath: localChrome,
+          args: ["--hide-scrollbars", "--disable-web-security"],
+          defaultViewport: { width: 1920, height: 1080 },
+          headless: true,
+        })
+      : // chromium-min's major version must match the Chrome that
+        // puppeteer-core targets (puppeteer-core 25.11 → Chrome 153).
+        // Upgrade them together.
+        await puppeteer.launch({
+          args: await puppeteer.defaultArgs({
+            args: [
+              ...chromium.args,
+              "--hide-scrollbars",
+              "--disable-web-security",
+            ],
+            headless: "shell",
+          }),
+          defaultViewport: { width: 1920, height: 1080 },
+          executablePath: await chromium.executablePath(
+            `https://github.com/Sparticuz/chromium/releases/download/v153.0.0/chromium-v153.0.0-pack.x64.tar`,
+          ),
+          headless: "shell",
+        });
 
     const page = await browser.newPage();
     // setContent no longer accepts "networkidle0"; wait for the fonts and

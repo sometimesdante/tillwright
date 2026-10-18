@@ -6,14 +6,14 @@ export default function Shipping() {
 
   return (
     <div className="w-full md:w-1/2 mx-auto">
-      <h1 className="text-3xl mb-4">Shipping Policy</h1>
+      <h1 className="text-3xl mb-4">Shipping policy</h1>
       <p>Last updated: {policies.lastUpdated}</p>
       <p>
         This policy explains where we deliver, how long it takes and what to
         expect once you place an order with {siteConfig.name}.
       </p>
 
-      <h2>Delivery Areas</h2>
+      <h2>Delivery areas</h2>
       <p>
         We currently deliver to {policies.deliveryArea}. Enter your full
         address at checkout. If we can&apos;t deliver to your location, we will
@@ -21,7 +21,7 @@ export default function Shipping() {
         any payment made.
       </p>
 
-      <h2>Order Processing</h2>
+      <h2>Order processing</h2>
       <p>
         Orders are processed within {policies.processingTime} of being placed.
         Orders placed on Sundays or public holidays are processed on the next
@@ -29,20 +29,20 @@ export default function Shipping() {
         little longer; we will let you know if your order is delayed.
       </p>
 
-      <h2>Delivery Times</h2>
+      <h2>Delivery times</h2>
       <p>
         Once dispatched, most orders arrive within {policies.deliveryTime}.
         Delivery times are estimates and may be affected by weather, local
         restrictions or other events outside our control.
       </p>
 
-      <h2>Shipping Charges</h2>
+      <h2>Shipping charges</h2>
       <p>
         {policies.shippingCharges} Any applicable charges are always shown at
         checkout before you pay.
       </p>
 
-      <h2>Order Updates</h2>
+      <h2>Order updates</h2>
       <p>
         You will receive an email and a WhatsApp message when your order is
         confirmed, and another WhatsApp message when it is dispatched. You can
@@ -50,7 +50,7 @@ export default function Shipping() {
         Orders page in your account.
       </p>
 
-      <h2>Receiving Your Order</h2>
+      <h2>Receiving your order</h2>
       <ul>
         <li>
           Please make sure your address and phone number are correct. We are
@@ -68,7 +68,7 @@ export default function Shipping() {
         </li>
       </ul>
 
-      <h2>Damaged or Missing Items</h2>
+      <h2>Damaged or missing items</h2>
       <p>
         Please check your order when it arrives. If anything is damaged,
         missing or incorrect, contact us within {policies.damageReportWindow}{" "}

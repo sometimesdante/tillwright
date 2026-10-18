@@ -95,7 +95,7 @@ export default function Profile() {
                   name="name"
                   autoComplete="name"
                   id="profile-name"
-                  placeholder="John Doe"
+                  placeholder="Priya Raman"
                   defaultValue={userData?.name}
                   className={inputClass}
                 />
@@ -155,13 +155,13 @@ export default function Profile() {
 
         <div className="flex flex-col gap-4 border-t border-line pt-6">
           <div>
-            <p className="text-sm text-ink-muted">Customer Name</p>
+            <p className="text-sm text-ink-muted">Name</p>
             <p className="font-medium text-ink">
               {userData?.name ?? "—"}
             </p>
           </div>
           <div>
-            <p className="text-sm text-ink-muted">Phone Number</p>
+            <p className="text-sm text-ink-muted">Phone number</p>
             <p className="font-medium text-ink">
               {userData?.phone ?? "—"}
             </p>

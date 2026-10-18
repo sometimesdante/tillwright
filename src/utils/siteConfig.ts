@@ -11,7 +11,10 @@ export const siteConfig = {
   website: "tillwright.app",
   // Public site address, used for links in emails and logo URLs in PDFs.
   websiteUrl: "https://www.tillwright.app",
-  logoPath: "/brand-docs/assets/tillwright-mark.svg",
+  // The mark alone: favicon-sized spaces, the admin sidebar and PDFs.
+  logoPath: "/brand-docs/assets/Logos/tillwright-mark.svg",
+  // Mark plus name, for the site header (brand-docs: headers use the wordmark).
+  wordmarkPath: "/brand-docs/assets/Logos/tillwright-wordmark.svg",
 
   // --- Contact ---
   email: "orders@tillwright.app",

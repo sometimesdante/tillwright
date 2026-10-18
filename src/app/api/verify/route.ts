@@ -7,6 +7,7 @@ import { validatePaymentVerification } from "razorpay/dist/utils/razorpay-utils"
 import { fetchInvoiceNumber } from "@/utils/functions/fetchInvoiceNumber";
 import { handleWhatsapp } from "@/utils/functions/handleWhatsapp";
 import { SITE_URL } from "@/utils/siteUrl";
+import { formatInvoiceNo } from "@/utils/formatInvoiceNo";
 
 export async function GET(req: Request): Promise<NextResponse> {
   const supabase = await createClient();
@@ -92,7 +93,7 @@ export async function GET(req: Request): Promise<NextResponse> {
     await handleWhatsapp(
       order?.phone,
       order?.name,
-      order?.invoice_id,
+      formatInvoiceNo(order?.invoice_id, order?.created_at) ?? "",
       "tomorrow"
     );
 

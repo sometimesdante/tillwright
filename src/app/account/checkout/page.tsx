@@ -8,6 +8,7 @@ import { getCurrentUser } from "@/utils/functions/getCurrentUser";
 import { handleCheckout } from "./actions";
 import { createClient } from "@/utils/supabase/client";
 import { sendGAEvent } from "@next/third-parties/google";
+import { formatINR } from "@/utils/formatINR";
 
 export default function Checkout() {
   const supabase = createClient();
@@ -94,10 +95,10 @@ export default function Checkout() {
         </div>
 
         <div className="bg-surface-raised rounded-md border border-line p-4">
-          <p className="text-sm text-ink-muted">Total Items</p>
+          <p className="text-sm text-ink-muted">Total items</p>
           <p className="text-lg font-semibold text-ink">{totalItems}</p>
-          <p className="text-sm text-ink-muted mt-2">Total Price</p>
-          <p className="text-lg font-semibold text-ink font-mono tabular-nums">₹{Number(totalPrice).toFixed(2)}*</p>
+          <p className="text-sm text-ink-muted mt-2">Total price</p>
+          <p className="text-lg font-semibold text-ink font-mono tabular-nums">{formatINR(totalPrice)}*</p>
         </div>
       </div>
       <div className="w-full md:max-w-md min-w-0">
@@ -107,11 +108,11 @@ export default function Checkout() {
               <h2 className="text-heading text-ink mb-6">Confirm your details</h2>
               <div className="flex flex-col gap-4">
                 <div>
-                  <p className="text-sm text-ink-muted">Customer Name</p>
+                  <p className="text-sm text-ink-muted">Name</p>
                   <p className="font-medium text-ink">{userData?.name}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-ink-muted">Phone Number</p>
+                  <p className="text-sm text-ink-muted">Phone number</p>
                   <p className="font-medium text-ink">{userData?.phone}</p>
                 </div>
                 <div>
@@ -216,13 +217,13 @@ export default function Checkout() {
                     name="name"
                     autoComplete="name"
                     id="checkout-name"
-                    placeholder="John Doe"
+                    placeholder="Priya Raman"
                     required
                     className={inputClass}
                   />
                 </span>
                 <span className="flex flex-col gap-2">
-                  <label htmlFor="checkout-phone" className="text-sm font-medium text-ink">Phone Number</label>
+                  <label htmlFor="checkout-phone" className="text-sm font-medium text-ink">Phone number</label>
                   <input
                     type="tel"
                     name="phone"

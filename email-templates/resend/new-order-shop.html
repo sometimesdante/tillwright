@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>New order {{{ORDER_NUMBER}}}: {{{ORDER_TOTAL}}}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700&family=IBM+Plex+Mono:wght@400;500&family=Instrument+Sans:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body style="margin:0;padding:0;background:#F3F5EE;">
+  <div style="display:none;max-height:0;overflow:hidden;opacity:0;">{{{CUSTOMER_NAME}}} placed an order for {{{ORDER_TOTAL}}}.</div>
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#F3F5EE;">
+    <tr>
+      <td align="center" style="padding:32px 16px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;">
+          <tr>
+            <td style="padding:0 0 24px;">
+              <a href="https://www.tillwright.app"><img src="https://www.tillwright.app/email/tillwright-wordmark.png" width="160" height="38" alt="Tillwright" style="display:block;border:0;"></a>
+            </td>
+          </tr>
+          <tr>
+            <td style="background:#FFFFFF;border:1px solid #D9DED3;border-radius:10px;padding:32px;">
+              <h1 style="margin:0 0 16px;font-family:'Bricolage Grotesque', 'Instrument Sans', Helvetica, Arial, sans-serif;font-size:24px;line-height:30px;font-weight:700;letter-spacing:-0.01em;color:#22201B;">New order {{{ORDER_NUMBER}}}</h1>
+              <p style="margin:0 0 16px;font-family:'Instrument Sans', Helvetica, Arial, sans-serif;font-size:15px;line-height:23px;color:#22201B;">{{{CUSTOMER_NAME}}} placed an order. Pack it and set the delivery status in the admin when it leaves.</p><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 24px;border-collapse:collapse;">
+              <tr>
+                <td style="padding:10px 0;border-top:1px solid #D9DED3;font-family:'Instrument Sans', Helvetica, Arial, sans-serif;font-size:13px;line-height:20px;color:#5E6359;width:120px;vertical-align:top;">Order</td>
+                <td style="padding:10px 0;border-top:1px solid #D9DED3;font-family:'IBM Plex Mono', Menlo, Consolas, monospace;font-size:14px;line-height:22px;color:#22201B;vertical-align:top;">{{{ORDER_NUMBER}}}</td>
+              </tr>
+              <tr>
+                <td style="padding:10px 0;border-top:1px solid #D9DED3;font-family:'Instrument Sans', Helvetica, Arial, sans-serif;font-size:13px;line-height:20px;color:#5E6359;width:120px;vertical-align:top;">Placed</td>
+                <td style="padding:10px 0;border-top:1px solid #D9DED3;font-family:'Instrument Sans', Helvetica, Arial, sans-serif;font-size:15px;line-height:22px;color:#22201B;vertical-align:top;">{{{ORDER_DATE}}}</td>
+              </tr>
+              <tr>
+                <td style="padding:10px 0;border-top:1px solid #D9DED3;font-family:'Instrument Sans', Helvetica, Arial, sans-serif;font-size:13px;line-height:20px;color:#5E6359;width:120px;vertical-align:top;">Items</td>
+                <td style="padding:10px 0;border-top:1px solid #D9DED3;font-family:'Instrument Sans', Helvetica, Arial, sans-serif;font-size:15px;line-height:22px;color:#22201B;vertical-align:top;">{{{ITEMS}}}</td>
+              </tr>
+              <tr>
+                <td style="padding:10px 0;border-top:1px solid #D9DED3;font-family:'Instrument Sans', Helvetica, Arial, sans-serif;font-size:13px;line-height:20px;color:#5E6359;width:120px;vertical-align:top;">Total</td>
+                <td style="padding:10px 0;border-top:1px solid #D9DED3;font-family:'IBM Plex Mono', Menlo, Consolas, monospace;font-size:14px;line-height:22px;color:#22201B;vertical-align:top;">{{{ORDER_TOTAL}}}</td>
+              </tr>
+              <tr>
+                <td style="padding:10px 0;border-top:1px solid #D9DED3;font-family:'Instrument Sans', Helvetica, Arial, sans-serif;font-size:13px;line-height:20px;color:#5E6359;width:120px;vertical-align:top;">Payment</td>
+                <td style="padding:10px 0;border-top:1px solid #D9DED3;font-family:'Instrument Sans', Helvetica, Arial, sans-serif;font-size:15px;line-height:22px;color:#22201B;vertical-align:top;">{{{PAYMENT_METHOD}}}</td>
+              </tr>
+              <tr>
+                <td style="padding:10px 0;border-top:1px solid #D9DED3;font-family:'Instrument Sans', Helvetica, Arial, sans-serif;font-size:13px;line-height:20px;color:#5E6359;width:120px;vertical-align:top;">Customer</td>
+                <td style="padding:10px 0;border-top:1px solid #D9DED3;font-family:'Instrument Sans', Helvetica, Arial, sans-serif;font-size:15px;line-height:22px;color:#22201B;vertical-align:top;">{{{CUSTOMER_NAME}}}<br>{{{CUSTOMER_PHONE}}}<br>{{{CUSTOMER_EMAIL}}}</td>
+              </tr>
+              <tr>
+                <td style="padding:10px 0;border-top:1px solid #D9DED3;font-family:'Instrument Sans', Helvetica, Arial, sans-serif;font-size:13px;line-height:20px;color:#5E6359;width:120px;vertical-align:top;">Deliver to</td>
+                <td style="padding:10px 0;border-top:1px solid #D9DED3;font-family:'Instrument Sans', Helvetica, Arial, sans-serif;font-size:15px;line-height:22px;color:#22201B;vertical-align:top;">{{{DELIVERY_ADDRESS}}}</td>
+              </tr>
+            </table>
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 24px;">
+              <tr>
+                <td style="border-radius:10px;background:#1F4D36;">
+                  <a href="https://www.tillwright.app/admin/orders" style="display:inline-block;padding:12px 20px;font-family:'Instrument Sans', Helvetica, Arial, sans-serif;font-size:15px;line-height:20px;font-weight:600;color:#FFFFFF;text-decoration:none;border-radius:10px;">Open orders</a>
+                </td>
+              </tr>
+            </table>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:24px 4px 0;">
+              <p style="margin:0 0 8px;font-family:'Instrument Sans', Helvetica, Arial, sans-serif;font-size:13px;line-height:20px;color:#5E6359;">Sent to orders@tillwright.app by your Tillwright store.</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

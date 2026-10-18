@@ -1,31 +1,54 @@
 <div align="center">
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="public/brand-docs/assets/tillwright-wordmark-reverse.svg">
-  <img src="public/brand-docs/assets/tillwright-wordmark.svg" alt="Tillwright" width="280">
+  <source media="(prefers-color-scheme: dark)" srcset="public/brand-docs/assets/Logos/tillwright-wordmark-reverse.svg">
+  <img src="public/brand-docs/assets/Logos/tillwright-wordmark.svg" alt="Tillwright" width="280">
 </picture>
 
 <h1>Tillwright</h1>
 
-<p>Storefronts for growers and small makers.</p>
+<p><strong>Commerce for your Supabase app.</strong></p>
+
+<p>Products, carts, orders and Razorpay-ready checkout in the database you already have. No second server.</p>
 
 <p>
-  <a href="https://nextjs.org"><img alt="Next.js 16" src="https://img.shields.io/badge/Next.js-16.4-1F4D36?logo=nextdotjs&logoColor=white"></a>
-  <a href="https://nodejs.org"><img alt="Node.js 22 or later" src="https://img.shields.io/badge/Node.js-%E2%89%A522-1F4D36?logo=nodedotjs&logoColor=white"></a>
-  <a href="https://react.dev"><img alt="React 19" src="https://img.shields.io/badge/React-19.3-1F4D36?logo=react&logoColor=white"></a>
-  <a href="https://www.typescriptlang.org"><img alt="TypeScript 5" src="https://img.shields.io/badge/TypeScript-5-1F4D36?logo=typescript&logoColor=white"></a>
-  <a href="https://supabase.com"><img alt="Supabase" src="https://img.shields.io/badge/Supabase-auth%20%2B%20db-4A3324?logo=supabase&logoColor=white"></a>
-  <a href="https://razorpay.com"><img alt="Razorpay" src="https://img.shields.io/badge/Razorpay-payment%20links-4A3324?logo=razorpay&logoColor=white"></a>
-  <a href="https://resend.com"><img alt="Resend" src="https://img.shields.io/badge/Resend-email-4A3324?logo=resend&logoColor=white"></a>
-  <a href="https://tailwindcss.com"><img alt="Tailwind CSS 4" src="https://img.shields.io/badge/Tailwind-4.3-4A3324?logo=tailwindcss&logoColor=white"></a>
   <a href="LICENSE"><img alt="MIT licence" src="https://img.shields.io/badge/licence-MIT-E9B949"></a>
+  <a href="package.json"><img alt="Version 1.2.0" src="https://img.shields.io/badge/version-1.2.0-1F4D36"></a>
+  <a href="https://nextjs.org"><img alt="Next.js 16" src="https://img.shields.io/badge/Next.js-16-1F4D36?logo=nextdotjs&logoColor=white"></a>
+  <a href="https://supabase.com"><img alt="Supabase" src="https://img.shields.io/badge/Supabase-Postgres%20%2B%20auth-4A3324?logo=supabase&logoColor=white"></a>
 </p>
 
 </div>
 
+## Quickstart
+
+```bash
+git clone https://github.com/<your-account>/tillwright.git && cd tillwright && npm install
+```
+
+Clone and install. You need Node.js 22 or later.
+
+```bash
+cp .env.example .env.local
+```
+
+Fill in `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, plus the seed variables at the bottom of the file: the service role key, the database URL, `SEED_ALLOW=true` and two demo passwords. Razorpay, Resend and WhatsApp keys can wait until you take real orders.
+
+```bash
+npm run seed && npm run dev
+```
+
+Creates the tables, loads the Tillwright Supply demo store and starts <http://localhost:3000>. Log in as `admin@tillwright.app` to see the admin side. [Full setup](#full-setup) covers each account and key.
+
 ## About
 
-Tillwright is a Next.js storefront template for growers and small makers who sell direct to customers in India. It gives you a product catalogue, a basket, Razorpay or cash-on-delivery checkout, order emails and WhatsApp messages, PDF invoices, and a small admin area for products and orders. Customer accounts and data live in Supabase.
+Tillwright puts products, carts, orders, checkout and GST invoices in the Supabase Postgres you already run, with Razorpay, cash on delivery and WhatsApp order updates built in for India. It ships with a reference storefront, Tillwright Supply, that you can use as-is, re-skin, or throw away.
+
+- Runs on Next.js and Supabase: no Redis and no separate Node server.
+- Razorpay payment links, cash on delivery, and UPI through Razorpay.
+- GST invoices and order exports as PDF.
+- WhatsApp and email order updates.
+- Your data in your own Postgres, open source under MIT.
 
 | Area | Feature | What the code does |
 | --- | --- | --- |
@@ -53,15 +76,28 @@ Tillwright is a Next.js storefront template for growers and small makers who sel
 | Account | Profile | View and edit name, phone, address and email (Supabase user metadata). |
 | | Order history | Orders whose `email` matches the signed-in user, with invoice download. |
 
+## What it doesn't do yet
+
+- No product pages, variants (sizes, colours), digital goods, bundles or gift cards. The items waiting on these are in [docs/seed-roadmap.md](docs/seed-roadmap.md).
+- Stock isn't reduced when an order is placed.
+- The order total comes from the browser, and the Razorpay signature isn't enforced. Fix both before you take real payments.
+- Invoice numbers come from application code (max + 1), not a database sequence.
+- No CSV export, discount codes or shipping rates.
+
+The full list, with fixes, is in [Known limitations and security notes](#known-limitations-and-security-notes).
+
 ## Contents
 
 - [Screenshots](#screenshots)
 - [Tech stack](#tech-stack)
 - [Architecture](#architecture)
-- [Quick start](#quick-start)
+- [Quickstart](#quickstart)
+- [What it doesn't do yet](#what-it-doesnt-do-yet)
+- [Full setup](#full-setup)
 - [Set up your accounts](#set-up-your-accounts)
 - [Environment variables](#environment-variables)
 - [Database schema](#database-schema)
+- [Demo data](#demo-data)
 - [Make it yours](#make-it-yours)
 - [Project structure](#project-structure)
 - [Scripts](#scripts)
@@ -71,19 +107,24 @@ Tillwright is a Next.js storefront template for growers and small makers who sel
 
 ## Screenshots
 
-<!-- TODO: add screenshots at these paths. -->
+Captured from the [demo data](#demo-data). The images are in `public/screenshots/`.
 
 <table>
   <tr>
-    <td align="center"><img src="docs/screenshots/storefront.png" alt="Storefront" width="400"><br>Storefront</td>
-    <td align="center"><img src="docs/screenshots/cart.png" alt="Cart" width="400"><br>Cart</td>
+    <td align="center"><img src="public/screenshots/storefront.png" alt="Storefront" width="400"><br>Storefront</td>
+    <td align="center"><img src="public/screenshots/cart.png" alt="Cart" width="400"><br>Cart</td>
   </tr>
   <tr>
-    <td align="center"><img src="docs/screenshots/checkout.png" alt="Checkout" width="400"><br>Checkout</td>
-    <td align="center"><img src="docs/screenshots/admin.png" alt="Admin orders" width="400"><br>Admin</td>
+    <td align="center"><img src="public/screenshots/checkout.png" alt="Checkout" width="400"><br>Checkout</td>
+    <td align="center"><img src="public/screenshots/account-orders.png" alt="Customer order history" width="400"><br>Order history</td>
   </tr>
   <tr>
-    <td align="center" colspan="2"><img src="docs/screenshots/invoice.png" alt="PDF invoice" width="400"><br>Invoice</td>
+    <td align="center"><img src="public/screenshots/admin-dashboard.png" alt="Admin dashboard" width="400"><br>Admin dashboard</td>
+    <td align="center"><img src="public/screenshots/admin.png" alt="Admin orders" width="400"><br>Admin orders</td>
+  </tr>
+  <tr>
+    <td align="center"><img src="public/screenshots/admin-products.png" alt="Admin products" width="400"><br>Admin products</td>
+    <td align="center"><img src="public/screenshots/invoice.png" alt="PDF invoice" width="400"><br>Invoice</td>
   </tr>
 </table>
 
@@ -105,6 +146,7 @@ Versions are the ones installed from `package-lock.json`.
 | Styling | Tailwind CSS 4.3 | Utility classes, configured in `src/styles/globals.css` (`@theme`). Brand fonts come from Google Fonts. |
 | Dates and numbers | `date-fns`, `date-fns-tz`, `to-words` | IST timestamps and amounts in words on invoices. |
 | UI helpers | `react-toastify`, `react-datepicker` | Toasts and the date range picker for order exports. |
+| Icons | `lucide-react` | Line icons at the brand size and stroke, through `src/ui/Icon`. |
 | Analytics | `@next/third-parties` | Google Analytics tag and events. |
 
 ## Architecture
@@ -138,7 +180,7 @@ sequenceDiagram
     N-->>C: A4 PDF invoice
 ```
 
-## Quick start
+## Full setup
 
 You need Node.js 22 or later (set in `engines` in `package.json`) and npm. Check with `node -v`.
 
@@ -163,7 +205,7 @@ You need Node.js 22 or later (set in `engines` in `package.json`) and npm. Check
 
 4. Fill in `.env.local` using [Set up your accounts](#set-up-your-accounts). Leave `NEXT_PUBLIC_SITE_URL=http://localhost:3000` for local work.
 
-5. Create the database tables and storage bucket. See [Database schema](#database-schema).
+5. Create the database tables and storage bucket: run [`supabase/schema.sql`](supabase/schema.sql) in the Supabase SQL Editor, or let `npm run seed` do it. See [Database schema](#database-schema).
 
 6. Start the development server.
 
@@ -171,7 +213,7 @@ You need Node.js 22 or later (set in `engines` in `package.json`) and npm. Check
    npm run dev
    ```
 
-7. Open <http://localhost:3000>.
+7. Open <http://localhost:3000>. The store is empty until you add products in `/admin/products`, or load the demo store with [Demo data](#demo-data).
 
 > [!NOTE]
 > Order emails are sent by the server calling its own `/api/place-order` and `/api/confirm-order` routes at `NEXT_PUBLIC_SITE_URL`. If that variable points to another deployment, your local orders will trigger emails there instead.
@@ -302,7 +344,12 @@ Every variable the code reads. `.env.example` lists the same set with placeholde
 | `RESEND_API_KEY` | Required for emails | Resend **API Keys** | Server only |
 | `WHATSAPP_URL` | Required for WhatsApp | Meta **WhatsApp > API Setup** (phone number ID) | Server only |
 | `WHATSAPP_TOKEN` | Required for WhatsApp | Meta **WhatsApp > API Setup** or a System User token | Server only |
+| `CHROME_EXECUTABLE_PATH` | Optional, local only | Path to an installed Chrome, e.g. `C:\Program Files\Google\Chrome\Application\chrome.exe` | Server only. Lets `/api/pdf` work on Windows and macOS; leave unset in production |
 | `GA_MEASUREMENT_ID` | Optional | Google Analytics data stream | Read on the server, written into page HTML |
+| `SUPABASE_SERVICE_ROLE_KEY` | Only for `npm run seed` | Supabase **Project Settings > API Keys** (secret key) | Server only. Bypasses RLS; the app never reads it |
+| `SUPABASE_DB_URL` | Optional, for `npm run seed` | Supabase **Connect > Session pooler** connection string | Server only. Contains the database password. Lets the seed create the tables |
+| `SEED_ALLOW` | Only for `npm run seed` | Set to `true` on a development or demo project | Local only |
+| `SEED_ADMIN_PASSWORD`, `SEED_CUSTOMER_PASSWORD` | Only for `npm run seed` | Choose your own | Local only |
 
 > [!WARNING]
 > Never add the `NEXT_PUBLIC_` prefix to a secret. Next.js copies every `NEXT_PUBLIC_` value into the JavaScript sent to the browser. Keep `.env.local` out of git; `.gitignore` already excludes it.
@@ -321,6 +368,7 @@ The code expects four tables and one storage bucket. Column types are inferred f
 | `created_at` | `timestamptz` | yes | Defaults to `now()`. |
 | `name` | `text` | yes | Searched with `ilike`. |
 | `category` | `text` | no | Feeds the category filter. |
+| `description` | `text` | no | Two or three sentences, shown on the product card. |
 | `image_url` | `text` | no | Public URL from the `productImages` bucket. |
 | `purchase` | `numeric` | no | Purchase price ("PP" in admin). Shown only in admin. |
 | `mrp` | `numeric` | no | Maximum retail price. Used for "You saved" on invoices. |
@@ -339,8 +387,8 @@ The code expects four tables and one storage bucket. Column types are inferred f
 | `transaction_id` | `text` | yes | `nanoid()` reference, or `MANUAL` for custom invoices, so it is not unique. |
 | `razorpay_id` | `text` | no | Payment link ID, or `Not Applicable` for COD and custom invoices. |
 | `name`, `email`, `phone`, `address` | `text` | no | Customer details. `email` links orders to accounts. |
-| `payment_status` | `text` | yes | `pending`, `cod`, or the Razorpay link status (for example `paid`). |
-| `delivery_status` | `text` | yes | `pending`, `out for delivery` or `delivered`. |
+| `payment_status` | `text` | yes | `pending`, `cod`, or the Razorpay link status (for example `paid` or `cancelled`). |
+| `delivery_status` | `text` | yes | `pending`, `out for delivery`, `delivered` or `cancelled`. A cancelled order keeps its invoice number, so the series has no gaps for GST filing. |
 | `amount` | `numeric` | yes | Order total in rupees. |
 | `products` | `jsonb` | yes | Snapshot of each cart line: the full product row plus `count`. |
 
@@ -370,123 +418,14 @@ Storage: a public bucket named `productImages`. Admins upload to it, and `/admin
 ### Suggested SQL
 
 > [!WARNING]
-> This is a suggested starting point, not the schema of a running store. Test it on a fresh project first. The stricter RLS policies below **break parts of the current code**: see the list after the SQL.
+> This is a suggested starting point, not the schema of a running store. Test it on a fresh project first. The stricter RLS policies in it **break parts of the current code**: see the list below.
 
-```sql
--- Tables ------------------------------------------------------------------
+The SQL is in [`supabase/schema.sql`](supabase/schema.sql): the four tables, the sign-up trigger, the `is_admin()` helper, RLS policies and the storage upload policy. It is safe to run more than once. It creates whatever is missing (including the `description` column on older projects) and replaces functions, triggers and policies, but never drops tables or data. Apply it in either of two ways:
 
-create table public.products (
-  id          bigint generated by default as identity primary key,
-  created_at  timestamptz not null default now(),
-  name        text not null,
-  category    text,
-  image_url   text,
-  purchase    numeric,
-  mrp         numeric,
-  pretax      numeric,
-  tax         numeric,
-  price       numeric not null,
-  inventory   integer default 0
-);
+- Paste it into the Supabase **SQL Editor** and run it.
+- Set `SUPABASE_DB_URL` and run `npm run seed`, which applies it before loading the demo data. See [Demo data](#demo-data).
 
-create table public.transactions (
-  id               bigint generated by default as identity primary key,
-  created_at       timestamptz not null default now(),
-  invoice_id       integer unique,
-  transaction_id   text not null,
-  razorpay_id      text,
-  name             text,
-  email            text,
-  phone            text,
-  address          text,
-  payment_status   text not null,
-  delivery_status  text not null default 'pending',
-  amount           numeric not null,
-  products         jsonb not null default '[]'::jsonb
-);
-create index on public.transactions (transaction_id);
-create index on public.transactions (email);
-
--- id is not used by the code; it ties each profile to its auth user.
-create table public.profiles (
-  id     uuid primary key references auth.users (id) on delete cascade,
-  email  text not null unique,
-  role   text not null default 'customer'
-);
-
-create table public.guest_profiles (
-  id          bigint generated by default as identity primary key,
-  created_at  timestamptz not null default now(),
-  name        text,
-  email       text,
-  phone       text,
-  address     text,
-  role        text default 'guest'
-);
-
--- Create a profile row for every new sign-up (not in the app code).
-create or replace function public.handle_new_user()
-returns trigger language plpgsql security definer set search_path = public as $$
-begin
-  insert into public.profiles (id, email) values (new.id, new.email);
-  return new;
-end;
-$$;
-
-create trigger on_auth_user_created
-  after insert on auth.users
-  for each row execute function public.handle_new_user();
-
--- Admin helper, mirroring the app's check (profiles.role = 'admin' by email).
-create or replace function public.is_admin()
-returns boolean language sql stable security definer set search_path = public as $$
-  select exists (
-    select 1 from public.profiles
-    where email = auth.jwt() ->> 'email' and role = 'admin'
-  );
-$$;
-
--- Row-level security ------------------------------------------------------
-
-alter table public.products        enable row level security;
-alter table public.transactions    enable row level security;
-alter table public.profiles        enable row level security;
-alter table public.guest_profiles  enable row level security;
-
--- Products: anyone reads, only admins write.
-create policy "products are public" on public.products
-  for select using (true);
-create policy "admins insert products" on public.products
-  for insert to authenticated with check (public.is_admin());
-create policy "admins update products" on public.products
-  for update to authenticated using (public.is_admin()) with check (public.is_admin());
-
--- Transactions: customers see only their own orders, admins see and update all.
-create policy "anyone places an order" on public.transactions
-  for insert to anon, authenticated with check (true);
-create policy "customers read own orders" on public.transactions
-  for select to authenticated
-  using (email = auth.jwt() ->> 'email' or public.is_admin());
-create policy "admins update orders" on public.transactions
-  for update to authenticated using (public.is_admin()) with check (public.is_admin());
-
--- Profiles: users read their own row. Roles are changed only from the SQL editor.
-create policy "read own profile" on public.profiles
-  for select to authenticated using (email = auth.jwt() ->> 'email');
-
--- Guest profiles: anyone inserts, only admins read.
-create policy "anyone adds guest details" on public.guest_profiles
-  for insert to anon, authenticated with check (true);
-create policy "admins read guest details" on public.guest_profiles
-  for select to authenticated using (public.is_admin());
-
--- Storage: public reads, admin-only uploads to productImages.
-create policy "admins upload product images" on storage.objects
-  for insert to authenticated
-  with check (bucket_id = 'productImages' and public.is_admin());
-```
-
-These parts of the current code depend on looser access and will fail under the policies above:
+These parts of the current code depend on looser access and will fail under these policies:
 
 - `fetchInvoiceNumber` runs with the customer's session and reads the highest `invoice_id` across **all** orders. With the policies above it only sees the customer's own orders, so invoice numbers repeat.
 - `/api/verify` uses the browser Supabase client on the server with no session (role `anon`) to update and read the order.
@@ -514,17 +453,64 @@ The app treats a signed-in user as an admin when a `profiles` row with the same 
 
 3. Sign out and back in, then open `/admin`.
 
+## Demo data
+
+`npm run seed` fills a development project with **Tillwright Supply**, a developer merch demo store, so every screen has something to show:
+
+- **Products:** six products, with descriptions, images, GST and margins. They cover out of stock, low stock, on sale, the cheapest item and a second category.
+- **Orders:** eight orders over the last 30 days: paid online, COD pending, COD delivered, out for delivery and one cancelled.
+- **Accounts:** three demo logins and one guest checkout.
+
+The data lives in `scripts/seed-data.ts`. Six more catalogue items that need features the app doesn't have yet are in [docs/seed-roadmap.md](docs/seed-roadmap.md). Image credits are in [docs/image-credits.md](docs/image-credits.md).
+
+> [!WARNING]
+> The seed uses the service role key, which bypasses row-level security. Run it only against a development or demo project, never production.
+
+1. Add these to `.env.local`:
+
+   ```bash
+   SUPABASE_SERVICE_ROLE_KEY=sb_secret_...   # Project Settings > API Keys
+   SUPABASE_DB_URL=postgresql://...          # Connect > Session pooler; optional
+   SEED_ALLOW=true
+   SEED_ADMIN_PASSWORD=choose-a-password
+   SEED_CUSTOMER_PASSWORD=choose-another-password
+   ```
+
+2. Run the seed:
+
+   ```bash
+   npm run seed
+   ```
+
+   With `SUPABASE_DB_URL` set, it first applies [`supabase/schema.sql`](supabase/schema.sql). Without it, run that file in the SQL Editor first; the seed stops with a message if the tables are missing. It also creates the public `productImages` bucket if it's missing.
+
+Running it again updates the same rows instead of adding more: products match on name, accounts and guests on email, and orders on their `seed_` reference. Orders keep their original dates and invoice numbers, so the invoice series never changes. To remove only the seeded rows, users and images, and nothing else:
+
+```bash
+npm run seed -- --reset
+```
+
+The seed writes to the database directly and never calls the app's routes, so it sends no emails or WhatsApp messages.
+
+| Login | Role | What you'll see |
+| --- | --- | --- |
+| `admin@tillwright.app` | Admin | `/admin` dashboard, orders, products and gallery. Password: `SEED_ADMIN_PASSWORD`. |
+| `priya.raman@tillwright.app` | Customer | Saved Chennai address and four past orders, one of them cancelled. Password: `SEED_CUSTOMER_PASSWORD`. |
+| `arjun.mehta@tillwright.app` | Customer | A brand new account with no orders. Password: `SEED_CUSTOMER_PASSWORD`. |
+
+The guest checkout, Kavya Iyer, has no login. Her COD order appears in `/admin/orders`.
+
 ## Make it yours
 
 1. **Store details.** Edit `src/utils/siteConfig.ts`, the single config file. It holds the name, legal name, description, website, logo path, contact email and phone, address lines, support hours, grievance officer, product request form URL, invoice registrations (GST, PAN, FSSAI), email sender, admin email, signature, and policy values. Header, footer, invoices, exports, emails and policy pages all read from it. Example registration: `{ label: "GST Number", value: "33AABCT4821K1ZQ" }`.
 2. **Brand.**
    - Fonts: the Google Fonts import and the `--font-*` variables in the `@theme` block of `src/styles/globals.css` (`font-display`, `font-sans`, `font-mono`). PDFs load the same fonts from `src/utils/pdfHead.ts`, so change both.
-   - Colours: the brand palette (field green `#1F4D36`, rye gold `#E9B949`, loam `#4A3324`) is defined in `public/brand-docs/tokens.json`, but the `@theme` block in `src/styles/globals.css` does not use it yet. The UI still uses Tailwind defaults such as `bg-lime-400` and `bg-slate-600` directly in components under `src/ui/`.
-     <!-- TODO: map tokens.json into the @theme block in globals.css and replace the hard-coded lime/slate classes. -->
+   - Colours: the brand palette from `public/brand-docs/tokens.json` is mapped into the `@theme` block in `src/styles/globals.css`, so components use utilities such as `bg-surface`, `text-ink` and `bg-field`. To rebrand, change `field`, `rye` and `loam` there. PDFs and emails don't use the theme and keep their own colours.
    - Favicon: `src/app/icon.svg`.
-   - Logos: `public/brand-docs/assets/`. The path the app uses is `siteConfig.logoPath`.
+   - Logos: `public/brand-docs/assets/Logos/`. The header uses `siteConfig.wordmarkPath`; the admin sidebar and PDFs use the mark alone, `siteConfig.logoPath`.
+   - Icons: [Lucide](https://lucide.dev) through `src/ui/Icon`, which applies the brand size (20px) and stroke (1.75px).
 3. **Content.** Edit `src/app/about/page.tsx`, `about/contact`, `about/terms`, `about/privacy`, `about/shipping` and `about/returns`. Most values come from `siteConfig.policies`, but read every page through and have a legal professional review them.
-4. **Email copy.** Edit `src/ui/Components/email-order-place.tsx` (to the shop) and `email-order-confirm.tsx` (to the customer). Subjects are set in `src/app/api/place-order/route.ts` and `src/app/api/confirm-order/route.ts`.
+4. **Email copy.** Branded HTML templates for Supabase account emails (sign-up, email change, password reset) and Resend order emails (confirmed, out for delivery, delivered, cancelled, new order for the shop) are in [`email-templates/`](email-templates/README.md), with paste-in steps. The two order emails the app sends today are React components: `src/ui/Components/email-order-place.tsx` (to the shop) and `email-order-confirm.tsx` (to the customer). Subjects are set in `src/app/api/place-order/route.ts` and `src/app/api/confirm-order/route.ts`.
 5. **WhatsApp copy.** Message text lives in the Meta templates, not in this repository. The template names, language (`en_US`) and parameters are in `src/utils/functions/handleWhatsapp.ts` and `handleDispatchWhatsapp.ts`.
 6. **Invoices and tax.** Layout: `src/ui/GenerateBill/index.tsx` (order invoices), `src/ui/CustomInvoice/index.tsx` (manual invoices), `src/ui/ExportOrders` and `src/ui/ExportProducts` (exports). Tax rates are entered per product in admin. The invoice prints the stored rate and works out the tax amount as `(price - pretax) × count`. There is no CGST/SGST/IGST split.
 7. **Currency, phone code and locale.** These are hard-coded:
@@ -579,6 +565,7 @@ src/
 | `npm run build` | Creates a production build. |
 | `npm run start` | Serves the production build. Run `build` first. |
 | `npm run lint` | Runs ESLint 9 with the flat config in `eslint.config.mjs` (`eslint-config-next`). |
+| `npm run seed` | Loads the demo store into a development project. Add `-- --reset` to remove it. See [Demo data](#demo-data). |
 
 ## Deploying to production
 
@@ -627,7 +614,6 @@ Found while reading the code. The code has **not** been changed for any of these
     - `sassOptions` in `next.config.ts` (Sass is not installed)
     - `src/store/counterStore.ts` and `src/store/searchText.ts`
     - `src/ui/Components/email-template.tsx`
-    - the `description` field on the `Product` type
 
 ## Licence and credits
 

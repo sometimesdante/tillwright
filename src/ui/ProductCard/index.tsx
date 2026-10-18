@@ -5,12 +5,14 @@ import { Product } from "@/utils/types";
 import Image from "next/image";
 import QuantityIcon from "../QuantityIcon";
 import { useEffect, useState } from "react";
+import { formatINR } from "@/utils/formatINR";
 
 const ProductCard = ({
   image_url,
   name,
   price,
   category,
+  description,
   product,
 }: Product) => {
   const cart = useCartStore((state: any) => state.cart);
@@ -31,9 +33,10 @@ const ProductCard = ({
   }, [cart, product.name]);
 
   return (
-    <div className="w-full min-w-0 h-full rounded-md shadow-float bg-surface-raised overflow-hidden flex flex-col">
+    <div className="w-full min-w-0 h-full rounded-md border border-line bg-surface-raised overflow-hidden flex flex-col">
       <div className="w-full aspect-square flex-shrink-0 overflow-hidden flex items-center justify-center bg-line rounded-t-md">
         <Image
+          loading="eager"
           src={image_url.trimEnd()}
           width={256}
           height={256}
@@ -48,10 +51,15 @@ const ProductCard = ({
         {category ? (
           <p className="text-sm text-ink-muted mt-0.5 line-clamp-1">{category}</p>
         ) : null}
+        {description ? (
+          <p className="text-sm text-ink-muted mt-2 line-clamp-2">
+            {description}
+          </p>
+        ) : null}
         <div className="flex flex-col gap-2 mt-auto pt-2">
           <p className="flex flex-wrap gap-x-1.5 items-baseline">
             <span className="text-ink text-price font-mono tabular-nums">
-              ₹{Number(price).toFixed(2)}
+              {formatINR(price)}
             </span>
             <span className="text-xs text-ink-muted">(Incl. Tax)</span>
           </p>

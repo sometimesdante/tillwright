@@ -53,7 +53,7 @@ export default function Contact() {
 
         <section className="mt-8 pt-6 border-t border-line">
           <h2 className="text-heading text-ink mb-3">
-            Grievance Officer
+            Grievance officer
           </h2>
           <p className="text-ink leading-relaxed mb-4">
             If you are not satisfied with how your query or complaint has been

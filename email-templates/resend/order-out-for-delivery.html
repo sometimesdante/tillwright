@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Order {{{ORDER_NUMBER}}} is on its way</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700&family=IBM+Plex+Mono:wght@400;500&family=Instrument+Sans:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body style="margin:0;padding:0;background:#F3F5EE;">
+  <div style="display:none;max-height:0;overflow:hidden;opacity:0;">Your order has left us and should reach you soon.</div>
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#F3F5EE;">
+    <tr>
+      <td align="center" style="padding:32px 16px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;">
+          <tr>
+            <td style="padding:0 0 24px;">
+              <a href="https://www.tillwright.app"><img src="https://www.tillwright.app/email/tillwright-wordmark.png" width="160" height="38" alt="Tillwright" style="display:block;border:0;"></a>
+            </td>
+          </tr>
+          <tr>
+            <td style="background:#FFFFFF;border:1px solid #D9DED3;border-radius:10px;padding:32px;">
+              <h1 style="margin:0 0 16px;font-family:'Bricolage Grotesque', 'Instrument Sans', Helvetica, Arial, sans-serif;font-size:24px;line-height:30px;font-weight:700;letter-spacing:-0.01em;color:#22201B;">Your order is on its way</h1>
+              <p style="margin:0 0 16px;font-family:'Instrument Sans', Helvetica, Arial, sans-serif;font-size:15px;line-height:23px;color:#22201B;">Hi {{{CUSTOMER_NAME}}}, your order has left us and is out for delivery. Please keep your phone handy so the delivery partner can reach you.</p><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 24px;border-collapse:collapse;">
+              <tr>
+                <td style="padding:10px 0;border-top:1px solid #D9DED3;font-family:'Instrument Sans', Helvetica, Arial, sans-serif;font-size:13px;line-height:20px;color:#5E6359;width:120px;vertical-align:top;">Order</td>
+                <td style="padding:10px 0;border-top:1px solid #D9DED3;font-family:'IBM Plex Mono', Menlo, Consolas, monospace;font-size:14px;line-height:22px;color:#22201B;vertical-align:top;">{{{ORDER_NUMBER}}}</td>
+              </tr>
+              <tr>
+                <td style="padding:10px 0;border-top:1px solid #D9DED3;font-family:'Instrument Sans', Helvetica, Arial, sans-serif;font-size:13px;line-height:20px;color:#5E6359;width:120px;vertical-align:top;">Placed</td>
+                <td style="padding:10px 0;border-top:1px solid #D9DED3;font-family:'Instrument Sans', Helvetica, Arial, sans-serif;font-size:15px;line-height:22px;color:#22201B;vertical-align:top;">{{{ORDER_DATE}}}</td>
+              </tr>
+              <tr>
+                <td style="padding:10px 0;border-top:1px solid #D9DED3;font-family:'Instrument Sans', Helvetica, Arial, sans-serif;font-size:13px;line-height:20px;color:#5E6359;width:120px;vertical-align:top;">Items</td>
+                <td style="padding:10px 0;border-top:1px solid #D9DED3;font-family:'Instrument Sans', Helvetica, Arial, sans-serif;font-size:15px;line-height:22px;color:#22201B;vertical-align:top;">{{{ITEMS}}}</td>
+              </tr>
+              <tr>
+                <td style="padding:10px 0;border-top:1px solid #D9DED3;font-family:'Instrument Sans', Helvetica, Arial, sans-serif;font-size:13px;line-height:20px;color:#5E6359;width:120px;vertical-align:top;">Total</td>
+                <td style="padding:10px 0;border-top:1px solid #D9DED3;font-family:'IBM Plex Mono', Menlo, Consolas, monospace;font-size:14px;line-height:22px;color:#22201B;vertical-align:top;">{{{ORDER_TOTAL}}}</td>
+              </tr>
+              <tr>
+                <td style="padding:10px 0;border-top:1px solid #D9DED3;font-family:'Instrument Sans', Helvetica, Arial, sans-serif;font-size:13px;line-height:20px;color:#5E6359;width:120px;vertical-align:top;">Payment</td>
+                <td style="padding:10px 0;border-top:1px solid #D9DED3;font-family:'Instrument Sans', Helvetica, Arial, sans-serif;font-size:15px;line-height:22px;color:#22201B;vertical-align:top;">{{{PAYMENT_METHOD}}}</td>
+              </tr>
+              <tr>
+                <td style="padding:10px 0;border-top:1px solid #D9DED3;font-family:'Instrument Sans', Helvetica, Arial, sans-serif;font-size:13px;line-height:20px;color:#5E6359;width:120px;vertical-align:top;">Deliver to</td>
+                <td style="padding:10px 0;border-top:1px solid #D9DED3;font-family:'Instrument Sans', Helvetica, Arial, sans-serif;font-size:15px;line-height:22px;color:#22201B;vertical-align:top;">{{{DELIVERY_ADDRESS}}}</td>
+              </tr>
+            </table><p style="margin:0 0 16px;font-family:'Instrument Sans', Helvetica, Arial, sans-serif;font-size:15px;line-height:23px;color:#22201B;">If you chose cash on delivery, keep {{{ORDER_TOTAL}}} ready, or pay the delivery partner by UPI.</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:24px 4px 0;">
+              <p style="margin:0 0 8px;font-family:'Instrument Sans', Helvetica, Arial, sans-serif;font-size:13px;line-height:20px;color:#5E6359;">Questions about your order? Reply to this email, write to <a href="mailto:orders@tillwright.app" style="color:#1F4D36;">orders@tillwright.app</a> or call +91 98401 27364, Monday to Saturday, 10:00 AM – 6:00 PM IST.</p><p style="margin:0 0 8px;font-family:'Instrument Sans', Helvetica, Arial, sans-serif;font-size:13px;line-height:20px;color:#5E6359;">Tillwright · No. 14, 2nd Floor, Vasantham Complex, Arcot Road, Valasaravakkam, Chennai, TN, 600087</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

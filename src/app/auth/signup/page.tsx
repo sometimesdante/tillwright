@@ -36,7 +36,7 @@ export default function SignUp() {
               name="name"
               autoComplete="name"
               id="name"
-              placeholder="John Doe"
+              placeholder="Priya Raman"
               required
               className={inputClass}
             />
