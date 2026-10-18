@@ -1,0 +1,56 @@
+<!-- @dsCard height=288 -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Tillwright</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700&family=Instrument+Sans:wght@400;500&display=swap">
+<style>
+  html, body { margin:0; height:100%; }
+  body { background:var(--surface); color:var(--ink); font-family:var(--font-sans); overflow:hidden; }
+  .cover { position:relative; height:288px; overflow:hidden; }
+  .art { position:absolute; top:0; left:480px; width:480px; height:288px; overflow:hidden; }
+  .art svg { display:block; width:480px; height:288px; }
+  .field { fill:var(--field); }
+  .soft { fill:var(--field-soft); }
+  .rye { fill:var(--rye); }
+  .loam { fill:var(--loam); }
+  .cut { fill:var(--surface); }
+  .blk { rx:var(--radius-md); }
+  .big { rx:var(--radius-lg); }
+  .pill { rx:12px; }
+  .words { position:absolute; left:var(--space-6); right:var(--space-6); bottom:var(--space-6); max-width:440px; }
+  .name { margin:0; font-family:var(--font-display); font-size:72px; line-height:.92; font-weight:700; letter-spacing:-.02em; color:var(--ink); }
+  .tag { margin:var(--space-2) 0 0 3px; font-size:14px; line-height:20px; color:var(--ink-muted); }
+</style>
+</head>
+<body>
+<div class="cover">
+<div class="art" aria-hidden="true">
+<svg viewBox="0 0 480 288" width="480" height="288">
+<!--
+  blocks      field 208x288 slab bled off top and bottom (the brand) · field-soft 144x232 bled off the right edge (the tint) · loam 112x136 · rye disc r48 on the slab plus one 64x24 rye pill (offers) - about 40% of 960x288
+  arrangement one tall field slab with satellites stepping down to the right, space-4 gutters, bottoms on one line space-6 above the edge
+  pattern     literal motif from the mark: a rye sun on a horizon with five furrows cut from the slab in surface, converging on the sun
+  scales      gutters space-4; offsets space-6/space-12; corners radius-md and radius-lg; pill rx 12 = half its 24 height
+-->
+<rect class="field big" x="16" y="-24" width="208" height="288"/>
+<circle class="rye" cx="120" cy="104" r="48"/>
+<rect class="field big" x="16" y="104" width="208" height="160"/>
+<rect class="cut" x="16" y="104" width="208" height="6"/>
+<polygon class="cut" points="104,110 110,110 92,264 72,264"/>
+<polygon class="cut" points="130,110 136,110 168,264 148,264"/>
+<polygon class="cut" points="80,110 86,110 32,264 16,264 16,236"/>
+<polygon class="cut" points="154,110 160,110 224,226 224,256"/>
+<rect class="loam blk" x="240" y="128" width="112" height="136"/>
+<rect class="rye pill" x="240" y="88" width="64" height="24"/>
+<rect class="soft big" x="368" y="32" width="144" height="232"/>
+</svg>
+</div>
+<div class="words">
+<h1 class="name">Tillwright</h1>
+<p class="tag">Storefronts for growers and small makers.</p>
+</div>
+</div>
+</body>
+</html>
