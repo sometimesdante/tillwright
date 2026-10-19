@@ -5,13 +5,13 @@ import AddedCard from "@/ui/AddedCard";
 import { Product, User } from "@/utils/types";
 import { useEffect, useState } from "react";
 import { getCurrentUser } from "@/utils/functions/getCurrentUser";
-import { handleCheckout } from "./actions";
-import { createClient } from "@/utils/supabase/client";
+import { placeOrder, type CheckoutContact } from "./actions";
+import { useRouter } from "next/navigation";
 import { sendGAEvent } from "@next/third-parties/google";
 import { formatINR } from "@/utils/formatINR";
 
 export default function Checkout() {
-  const supabase = createClient();
+  const router = useRouter();
   const totalItems = useCartStore((state: any) => state.totalItems);
   const totalPrice = useCartStore((state: any) => state.totalPrice);
   const cart = useCartStore((state: any) => state.cart);
@@ -19,6 +19,8 @@ export default function Checkout() {
   const [userData, setUserData] = useState<User | null>(null);
   const [paymentMode, setPaymentMode] = useState("online");
   const [clickStatus, setClickStatus] = useState(false);
+  const [placing, setPlacing] = useState(false);
+  const [orderError, setOrderError] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchUserData() {
@@ -34,37 +36,48 @@ export default function Checkout() {
     fetchUserData();
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const form = e.target as HTMLFormElement;
-    const formData = new FormData(form);
-
-    try {
-      const { error } = await supabase.from("guest_profiles").insert({
-        name: formData.get("name") as string,
-        email: formData.get("email") as string,
-        phone: formData.get("phone") as any,
-        role: "guest",
-        address: formData.get("address") as string,
-      });
-      if (error) {
-        console.log("Error creating user", error);
-      }
-
-      handleCheckout(
-        formData.get("name") as string,
-        formData.get("email") as string,
-        formData.get("address") as string,
-        formData.get("phone") as any,
-        paymentMode,
-        cart,
-        totalPrice
-      );
-      sendGAEvent("event", "buttonClicked", { value: "Order placed" });
-    } catch (error) {
-      console.error("Error placing order", error);
+  // Sends only product IDs and quantities; the server prices the order.
+  async function submitOrder(contact: CheckoutContact) {
+    setPlacing(true);
+    setOrderError(null);
+    const result = await placeOrder({
+      contact,
+      mode: paymentMode === "cod" ? "cod" : "online",
+      items: cart.map((product: Product) => ({
+        id: product.id,
+        count: product.count,
+      })),
+    });
+    if (!result.ok) {
+      setOrderError(result.error);
+      setPlacing(false);
+      return;
     }
+    sendGAEvent("event", "buttonClicked", { value: "Order placed" });
+    if (result.redirectTo.startsWith("http")) {
+      // Razorpay's payment page.
+      window.location.assign(result.redirectTo);
+    } else {
+      router.push(result.redirectTo);
+    }
+  }
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    await submitOrder({
+      name: String(formData.get("name") ?? ""),
+      email: String(formData.get("email") ?? ""),
+      phone: String(formData.get("phone") ?? ""),
+      address: String(formData.get("address") ?? ""),
+    });
   };
+
+  const errorMessage = orderError ? (
+    <p role="alert" className="text-sm text-danger mt-4">
+      {orderError}
+    </p>
+  ) : null;
 
   const inputClass =
     "w-full bg-surface-raised border border-line-strong rounded-sm px-4 py-2.5 text-ink placeholder:text-ink-muted focus:outline-none focus:ring-2 focus:ring-field/30 focus:border-field";
@@ -132,8 +145,8 @@ export default function Checkout() {
                       className={dropdownButtonClass}
                     >
                       {paymentMode == "online"
-                        ? "GPay/Credit/Debit Card"
-                        : "Cash on Delivery"}
+                        ? "UPI, card or net banking"
+                        : "Cash on delivery"}
                     </button>
                     {clickStatus && (
                       <span className={dropdownPanelClass}>
@@ -145,7 +158,7 @@ export default function Checkout() {
                           }}
                           className="cursor-pointer py-2 px-2 text-left text-sm text-ink hover:bg-surface rounded-sm"
                         >
-                          GPay/Credit/Debit Card
+                          UPI, card or net banking
                         </button>
                         <button
                           type="button"
@@ -155,7 +168,7 @@ export default function Checkout() {
                           }}
                           className="cursor-pointer py-2 px-2 text-left text-sm text-ink hover:bg-surface rounded-sm"
                         >
-                          Cash on Delivery
+                          Cash on delivery
                         </button>
                       </span>
                     )}
@@ -169,30 +182,26 @@ export default function Checkout() {
                     userData?.name &&
                     userData?.email &&
                     userData?.address &&
-                    userData?.phone &&
-                    cart &&
-                    totalPrice
+                    userData?.phone
                   ) {
-                    handleCheckout(
-                      userData.name,
-                      userData.email,
-                      userData.address,
-                      userData.phone,
-                      paymentMode,
-                      cart,
-                      totalPrice
-                    );
-                    sendGAEvent("event", "buttonClicked", {
-                      value: "Order placed",
+                    submitOrder({
+                      name: userData.name,
+                      email: userData.email,
+                      phone: String(userData.phone),
+                      address: userData.address,
                     });
                   } else {
-                    console.error("Some details are missing");
+                    setOrderError(
+                      "Add your phone number and address on your profile, then place the order.",
+                    );
                   }
                 }}
-                className="w-full bg-field text-on-field font-semibold py-2.5 px-4 rounded-md hover:opacity-90 transition-opacity mt-6"
+                disabled={placing}
+                className="w-full bg-field text-on-field font-semibold py-2.5 px-4 rounded-md hover:opacity-90 transition-opacity mt-6 disabled:opacity-60"
               >
-                Place your order
+                {placing ? "Placing your order…" : "Place your order"}
               </button>
+              {errorMessage}
             </div>
           ) : (
             <div className="bg-surface-raised rounded-md border border-line p-6">
@@ -256,8 +265,8 @@ export default function Checkout() {
                       className={dropdownButtonClass}
                     >
                       {paymentMode == "online"
-                        ? "GPay/Credit/Debit Card"
-                        : "Cash on Delivery"}
+                        ? "UPI, card or net banking"
+                        : "Cash on delivery"}
                     </button>
                     {clickStatus && (
                       <span className={dropdownPanelClass}>
@@ -269,7 +278,7 @@ export default function Checkout() {
                           }}
                           className="cursor-pointer py-2 px-2 text-left text-sm text-ink hover:bg-surface rounded-sm"
                         >
-                          GPay/Credit/Debit Card
+                          UPI, card or net banking
                         </button>
                         <button
                           type="button"
@@ -279,7 +288,7 @@ export default function Checkout() {
                           }}
                           className="cursor-pointer py-2 px-2 text-left text-sm text-ink hover:bg-surface rounded-sm"
                         >
-                          Cash on Delivery
+                          Cash on delivery
                         </button>
                       </span>
                     )}
@@ -287,10 +296,12 @@ export default function Checkout() {
                 </div>
                 <button
                   type="submit"
-                  className="w-full bg-field text-on-field font-semibold py-2.5 px-4 rounded-md hover:opacity-90 transition-opacity mt-4"
+                  disabled={placing}
+                  className="w-full bg-field text-on-field font-semibold py-2.5 px-4 rounded-md hover:opacity-90 transition-opacity mt-4 disabled:opacity-60"
                 >
-                  Place your order
+                  {placing ? "Placing your order…" : "Place your order"}
                 </button>
+                {errorMessage}
               </form>
             </div>
           )

@@ -174,7 +174,7 @@ export default function Terms() {
         by the Terms in place at the time the order was placed.
       </p>
 
-      <h2>Grievance officer</h2>
+      <h2>Grievance Officer</h2>
       <p>
         In line with the Consumer Protection (E-Commerce) Rules, 2020, you can
         raise complaints with our Grievance Officer. We acknowledge complaints

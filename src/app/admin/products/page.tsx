@@ -28,18 +28,25 @@ export default function ProductsDashboard() {
   const [category, setCategory] = useState("all");
   const [stock, setStock] = useState<StockFilter>("all");
 
-  const fetchProducts = useCallback(async () => {
-    const { data } = await supabase
-      .from("products")
-      .select()
-      .order("id", { ascending: true });
-    setProducts(data || []);
-    setLoading(false);
-  }, [supabase]);
+  // Bumped after an add or edit to load the list again.
+  const [version, setVersion] = useState(0);
+  const fetchProducts = useCallback(() => setVersion((v) => v + 1), []);
 
   useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
+    let ignore = false;
+    (async () => {
+      const { data } = await supabase
+        .from("products")
+        .select()
+        .order("id", { ascending: true });
+      if (ignore) return;
+      setProducts(data || []);
+      setLoading(false);
+    })();
+    return () => {
+      ignore = true;
+    };
+  }, [supabase, version]);
 
   const categories = useMemo(
     () =>

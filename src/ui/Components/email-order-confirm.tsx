@@ -7,7 +7,7 @@ export const OrderConfirmationTemplate = ({
   <div>
     <h3>Hello {firstName}</h3>
     <p>
-      Thank you for your order! We have received it and are getting it ready.
+      Thanks for your order. We've received it and we're getting it ready.
       <br />
       You can expect your order within {siteConfig.policies.deliveryTime}. If
       it hasn&apos;t arrived by then, please contact us at {siteConfig.phone}{" "}

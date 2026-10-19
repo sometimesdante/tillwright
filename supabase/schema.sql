@@ -46,6 +46,10 @@ create table if not exists public.transactions (
   amount           numeric not null,
   products         jsonb not null default '[]'::jsonb
 );
+-- True once this order has taken its items out of stock, so cancelling it
+-- knows whether to put them back.
+alter table public.transactions
+  add column if not exists stock_reserved boolean not null default false;
 create index if not exists transactions_transaction_id_idx on public.transactions (transaction_id);
 create index if not exists transactions_email_idx on public.transactions (email);
 
@@ -90,7 +94,92 @@ returns boolean language sql stable security definer set search_path = public as
   );
 $$;
 
+-- Invoice numbers --------------------------------------------------------
+-- One gap-free series for GST, handed out by the database so two orders
+-- placed at the same moment can't get the same number. The app shows them
+-- as INV-<year>-<0000> (src/utils/formatInvoiceNo.ts).
+
+create sequence if not exists public.invoice_number_seq;
+
+-- Keep the sequence ahead of numbers already in use (safe to re-run).
+select setval(
+  'public.invoice_number_seq',
+  greatest(coalesce((select max(invoice_id) from public.transactions), 0), 1),
+  coalesce((select max(invoice_id) from public.transactions), 0) > 0
+);
+
+-- Gives an order its invoice number once; later calls return the same one.
+create or replace function public.assign_invoice_number(order_id bigint)
+returns integer language plpgsql security definer set search_path = public as $$
+declare
+  assigned integer;
+begin
+  update transactions
+     set invoice_id = nextval('invoice_number_seq')
+   where id = order_id and invoice_id is null
+  returning invoice_id into assigned;
+
+  if assigned is null then
+    select invoice_id into assigned from transactions where id = order_id;
+  end if;
+  return assigned;
+end;
+$$;
+
+-- Stock -------------------------------------------------------------------
+-- items is a JSON array of {"id": <product id>, "count": <quantity>}.
+
+-- Takes items out of stock only if every one of them is available. Locks the
+-- product rows first, so two checkouts can't both buy the last unit.
+create or replace function public.reserve_stock(items jsonb)
+returns boolean language plpgsql security definer set search_path = public as $$
+declare
+  item jsonb;
+  available integer;
+begin
+  perform 1 from products
+   where id in (select (value ->> 'id')::bigint from jsonb_array_elements(items))
+   order by id
+     for update;
+
+  for item in select value from jsonb_array_elements(items) loop
+    select inventory into available from products where id = (item ->> 'id')::bigint;
+    if available is null or available < (item ->> 'count')::integer then
+      return false;
+    end if;
+  end loop;
+
+  update products p
+     set inventory = p.inventory - (i.value ->> 'count')::integer
+    from jsonb_array_elements(items) i
+   where p.id = (i.value ->> 'id')::bigint;
+  return true;
+end;
+$$;
+
+-- Moves stock without checking: direction -1 takes items (an online payment
+-- that already went through), +1 puts them back (a cancelled order).
+-- Inventory never drops below zero.
+create or replace function public.adjust_stock(items jsonb, direction integer)
+returns void language sql security definer set search_path = public as $$
+  update products p
+     set inventory = greatest(coalesce(p.inventory, 0) + direction * (i.value ->> 'count')::integer, 0)
+    from jsonb_array_elements(items) i
+   where p.id = (i.value ->> 'id')::bigint;
+$$;
+
+-- Only the server (service role) may call these.
+revoke all on function public.assign_invoice_number(bigint) from public, anon, authenticated;
+revoke all on function public.reserve_stock(jsonb) from public, anon, authenticated;
+revoke all on function public.adjust_stock(jsonb, integer) from public, anon, authenticated;
+grant execute on function public.assign_invoice_number(bigint) to service_role;
+grant execute on function public.reserve_stock(jsonb) to service_role;
+grant execute on function public.adjust_stock(jsonb, integer) to service_role;
+
 -- Row-level security ------------------------------------------------------
+-- Orders, guest details, invoice numbers and stock are written only by the
+-- server with the service role key, which bypasses these policies. The
+-- policies below cover what the browser does with a signed-in session.
 
 alter table public.products        enable row level security;
 alter table public.transactions    enable row level security;
@@ -108,10 +197,9 @@ drop policy if exists "admins update products" on public.products;
 create policy "admins update products" on public.products
   for update to authenticated using (public.is_admin()) with check (public.is_admin());
 
--- Transactions: customers see only their own orders, admins see and update all.
+-- Transactions: customers see only their own orders, admins see and update
+-- all. Orders are placed by the server, so the browser can't insert them.
 drop policy if exists "anyone places an order" on public.transactions;
-create policy "anyone places an order" on public.transactions
-  for insert to anon, authenticated with check (true);
 drop policy if exists "customers read own orders" on public.transactions;
 create policy "customers read own orders" on public.transactions
   for select to authenticated
@@ -125,15 +213,17 @@ drop policy if exists "read own profile" on public.profiles;
 create policy "read own profile" on public.profiles
   for select to authenticated using (email = auth.jwt() ->> 'email');
 
--- Guest profiles: anyone inserts, only admins read.
+-- Guest profiles: written by the server at checkout, read by admins.
 drop policy if exists "anyone adds guest details" on public.guest_profiles;
-create policy "anyone adds guest details" on public.guest_profiles
-  for insert to anon, authenticated with check (true);
 drop policy if exists "admins read guest details" on public.guest_profiles;
 create policy "admins read guest details" on public.guest_profiles
   for select to authenticated using (public.is_admin());
 
--- Storage: public reads, admin-only uploads to productImages.
+-- Storage: public URLs work for everyone; admins list and upload.
+drop policy if exists "admins list product images" on storage.objects;
+create policy "admins list product images" on storage.objects
+  for select to authenticated
+  using (bucket_id = 'productImages' and public.is_admin());
 drop policy if exists "admins upload product images" on storage.objects;
 create policy "admins upload product images" on storage.objects
   for insert to authenticated

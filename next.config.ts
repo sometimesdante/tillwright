@@ -1,39 +1,15 @@
 import type { NextConfig } from "next";
 
+// Product images are served from this project's Supabase storage.
+const supabaseHost = process.env.NEXT_PUBLIC_SUPABASE_URL
+  ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).hostname
+  : undefined;
+
 const nextConfig: NextConfig = {
-  async headers() {
-    return [
-      {
-        // matching all API routes
-        source: "/api/:path*",
-        headers: [
-          { key: "Access-Control-Allow-Credentials", value: "true" },
-          { key: "Access-Control-Allow-Origin", value: "*" },
-          {
-            key: "Access-Control-Allow-Methods",
-            value: "GET,OPTIONS,PATCH,DELETE,POST,PUT",
-          },
-          {
-            key: "Access-Control-Allow-Headers",
-            value:
-              "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version",
-          },
-        ],
-      },
-    ];
-  },
-  sassOptions: {
-    silenceDeprecations: ["legacy-js-api"],
-  },
   reactStrictMode: false,
   images: {
     unoptimized: true,
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "dbalgddkkgwpzdwcxqoj.supabase.co",
-      },
-    ],
+    remotePatterns: supabaseHost ? [{ protocol: "https", hostname: supabaseHost }] : [],
   },
 };
 

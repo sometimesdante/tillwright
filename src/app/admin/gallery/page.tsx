@@ -2,7 +2,7 @@
 
 import { createClient } from "@/utils/supabase/client";
 import Image from "next/image";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function GalleryDashboard() {
 
@@ -10,32 +10,26 @@ export default function GalleryDashboard() {
   const [files, setFiles] = useState<any[]>([]);
   const bucket = "productImages";
 
-  const fetchFiles = useCallback(async () => {
-    const { data, error } = await supabase.storage.from(bucket).list();
-
-    if (error) {
-      console.error("Error fetching files:", error);
-      return;
-    }
-
-    if (!data) {
-      console.warn("No files found in the bucket.");
-      setFiles([]);
-      return;
-    }
-
-
-    const files = data.map((file) => ({
-      ...file,
-      url: supabase.storage.from(bucket).getPublicUrl(file.name).data.publicUrl,
-    }));
-    setFiles(files || []);
-  }, [supabase]);
-
   useEffect(() => {
-    fetchFiles();
-  }, [fetchFiles]);
-
+    let ignore = false;
+    (async () => {
+      const { data, error } = await supabase.storage.from(bucket).list();
+      if (ignore) return;
+      if (error) {
+        console.error("Error fetching files:", error);
+        return;
+      }
+      setFiles(
+        (data ?? []).map((file) => ({
+          ...file,
+          url: supabase.storage.from(bucket).getPublicUrl(file.name).data.publicUrl,
+        })),
+      );
+    })();
+    return () => {
+      ignore = true;
+    };
+  }, [supabase]);
 
   return (
     <div>

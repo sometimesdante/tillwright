@@ -57,20 +57,21 @@ Tillwright puts products, carts, orders, checkout and GST invoices in the Supaba
 | | Cart | Zustand store kept in `sessionStorage`: add, remove one, remove line, clear, running totals. |
 | Auth | Sign up and log in | Supabase email and password. Name, phone and address are saved as user metadata. |
 | | Email confirmation | `/auth/confirm` verifies the `token_hash` from the confirmation email and redirects to `next`. |
-| | Guest checkout | A checkout form for signed-out visitors. It writes the details to `guest_profiles`, then places the order. |
-| Payments | Razorpay | `/api/checkout` creates a Razorpay **Payment Link** (not an Order) and stores a pending transaction. |
-| | Callback | `/api/verify` receives the payment-link callback, sets the invoice number and payment status, and sends notifications. |
-| | Cash on delivery | Writes the order straight to `transactions` with `payment_status = cod`. |
+| | Guest checkout | A checkout form for signed-out visitors. The server saves the details to `guest_profiles` and places the order. |
+| Payments | Server-side totals | The `placeOrder` server action receives product IDs and quantities only, then prices the order and checks stock from the database. |
+| | Razorpay | `placeOrder` creates a Razorpay **Payment Link** (not an Order) for the server-side total and stores a pending transaction. |
+| | Callback | `/api/verify` checks the signature, confirms with Razorpay's API that the link is paid for the right order and amount, then takes stock, assigns the invoice number and sends notifications, once. |
+| | Cash on delivery | Reserves stock atomically, saves the order with `payment_status = cod`, and assigns the invoice number. |
 | | Result pages | `/notifications/success` (clears the cart) and `/notifications/failure`. |
-| Notifications | Email | Resend sends a "new order" email to the shop and a confirmation to the customer, both written as React components. |
+| Notifications | Email | Resend sends a "new order" email to the shop and a confirmation to the customer, from server code only. |
 | | WhatsApp | WhatsApp Cloud API templates: `order_placed` after checkout, `order_dispatched` when an admin updates delivery status. |
-| Invoices | PDF invoices | `/api/pdf` renders HTML to an A4 PDF with `puppeteer-core` and `@sparticuz/chromium-min`. |
+| Invoices | PDF invoices | `/api/pdf` renders an order, report or product list from IDs on the server to an A4 PDF with `puppeteer-core` and `@sparticuz/chromium-min`. Customers can print only their own orders. |
 | | Bill contents | Shop registrations (GST, PAN, FSSAI), customer details, MRP, unit price, tax rate, tax amount, savings, and the total in words (en-IN). |
-| | Custom invoice | Admin can create a one-line "Miscellaneous" invoice with any invoice number and amount. |
+| | Custom invoice | Admin can create a one-line invoice for a sale outside the store. It takes the next number in the series. |
 | Admin | Dashboard | `/admin` with links to orders and products. Access requires `profiles.role = 'admin'`. |
 | | Products | Add and edit products, and upload images to the `productImages` storage bucket. |
 | | Gallery | Read-only grid of the images in `productImages`. |
-| | Orders | Order list with customer details, a delivery status dropdown and per-order invoice download. |
+| | Orders | Order list with customer details, a delivery status dropdown and per-order invoice download. Cancelling an order puts its stock back. |
 | | Exports | PDF export of orders for a date range and of in-stock products. There is no CSV export. |
 | Analytics | Google Analytics | `@next/third-parties` GA tag on every page, plus a `buttonClicked` event when an order is placed. |
 | Account | Profile | View and edit name, phone, address and email (Supabase user metadata). |
@@ -79,10 +80,9 @@ Tillwright puts products, carts, orders, checkout and GST invoices in the Supaba
 ## What it doesn't do yet
 
 - No product pages, variants (sizes, colours), digital goods, bundles or gift cards. The items waiting on these are in [docs/seed-roadmap.md](docs/seed-roadmap.md).
-- Stock isn't reduced when an order is placed.
-- The order total comes from the browser, and the Razorpay signature isn't enforced. Fix both before you take real payments.
-- Invoice numbers come from application code (max + 1), not a database sequence.
 - No CSV export, discount codes or shipping rates.
+- No "forgot password" form or page to set a new password.
+- Admin pages for products and the gallery rely on row-level security, not a server-side check, to stop non-admins.
 
 The full list, with fixes, is in [Known limitations and security notes](#known-limitations-and-security-notes).
 
@@ -151,34 +151,39 @@ Versions are the ones installed from `package-lock.json`.
 
 ## Architecture
 
-How an online order moves through the system. Cash on delivery skips Razorpay: the browser writes the order to Supabase and sends the same notifications directly.
+How an online order moves through the system. The browser sends only product IDs, quantities and contact details; the server prices the order from the database, and only server code writes orders, invoice numbers and stock.
 
 ```mermaid
 sequenceDiagram
     autonumber
     actor C as Customer browser
-    participant N as Next.js API routes
+    participant N as Next.js server
     participant R as Razorpay
     participant S as Supabase
     participant E as Resend
     participant W as WhatsApp Cloud API
 
-    C->>N: POST /api/checkout (cart, total, contact)
-    N->>R: Create payment link
+    C->>N: placeOrder server action (product IDs, quantities, contact)
+    N->>S: Load products, check stock, price the order
+    N->>R: Create payment link for the server-side total
     N->>S: Insert transaction (payment_status pending)
     N-->>C: Payment link short_url
     C->>R: Pay on the Razorpay page
     R-->>C: Redirect to /api/verify?razorpay_...
     C->>N: GET /api/verify
-    N->>S: Read max invoice_id, update transaction (invoice_id, status)
+    N->>N: Check the signature
+    N->>R: Fetch the payment link: paid, right order, right amount?
+    N->>S: Mark paid, take stock, assign_invoice_number()
     N->>W: Send order_placed template
-    N->>E: POST /api/place-order and /api/confirm-order
-    E-->>C: Confirmation email
+    N->>E: Order emails to the shop and the customer
     N-->>C: Redirect to /notifications/success
     Note over C,N: Later, from the account or admin pages
-    C->>N: POST /api/pdf (invoice HTML)
+    C->>N: POST /api/pdf { type: "invoice", orderId }
+    N->>S: Read the order with the visitor's session (RLS)
     N-->>C: A4 PDF invoice
 ```
+
+Cash on delivery skips Razorpay: `placeOrder` reserves stock with `reserve_stock()`, saves the order, assigns the invoice number and sends the same notifications, all on the server.
 
 ## Full setup
 
@@ -216,7 +221,7 @@ You need Node.js 22 or later (set in `engines` in `package.json`) and npm. Check
 7. Open <http://localhost:3000>. The store is empty until you add products in `/admin/products`, or load the demo store with [Demo data](#demo-data).
 
 > [!NOTE]
-> Order emails are sent by the server calling its own `/api/place-order` and `/api/confirm-order` routes at `NEXT_PUBLIC_SITE_URL`. If that variable points to another deployment, your local orders will trigger emails there instead.
+> Placing a test order sends real emails and WhatsApp messages if `RESEND_API_KEY` and `WHATSAPP_TOKEN` are set. Leave them unset locally until you want to test notifications.
 
 ## Set up your accounts
 
@@ -346,7 +351,7 @@ Every variable the code reads. `.env.example` lists the same set with placeholde
 | `WHATSAPP_TOKEN` | Required for WhatsApp | Meta **WhatsApp > API Setup** or a System User token | Server only |
 | `CHROME_EXECUTABLE_PATH` | Optional, local only | Path to an installed Chrome, e.g. `C:\Program Files\Google\Chrome\Application\chrome.exe` | Server only. Lets `/api/pdf` work on Windows and macOS; leave unset in production |
 | `GA_MEASUREMENT_ID` | Optional | Google Analytics data stream | Read on the server, written into page HTML |
-| `SUPABASE_SERVICE_ROLE_KEY` | Only for `npm run seed` | Supabase **Project Settings > API Keys** (secret key) | Server only. Bypasses RLS; the app never reads it |
+| `SUPABASE_SERVICE_ROLE_KEY` | Required | Supabase **Project Settings > API Keys** (secret key) | Server only. Bypasses RLS. Used by checkout, payment verification, order status changes and `npm run seed` through `src/utils/supabase/admin.ts` |
 | `SUPABASE_DB_URL` | Optional, for `npm run seed` | Supabase **Connect > Session pooler** connection string | Server only. Contains the database password. Lets the seed create the tables |
 | `SEED_ALLOW` | Only for `npm run seed` | Set to `true` on a development or demo project | Local only |
 | `SEED_ADMIN_PASSWORD`, `SEED_CUSTOMER_PASSWORD` | Only for `npm run seed` | Choose your own | Local only |
@@ -383,14 +388,15 @@ The code expects four tables and one storage bucket. Column types are inferred f
 | --- | --- | --- | --- |
 | `id` | `bigint` identity | yes | Primary key. Used for invoices and status updates. |
 | `created_at` | `timestamptz` | yes | Defaults to `now()`. Shown in IST. |
-| `invoice_id` | `integer` | no | Set for COD at checkout, and for online orders in `/api/verify`. Computed as max + 1. |
-| `transaction_id` | `text` | yes | `nanoid()` reference, or `MANUAL` for custom invoices, so it is not unique. |
+| `invoice_id` | `integer` | no | Unique. Assigned by `assign_invoice_number()` from a database sequence: at checkout for COD, after payment for online orders. Shown as `INV-2026-0007`. |
+| `transaction_id` | `text` | yes | `nanoid()` reference, `MANUAL-…` for custom invoices, or `seed_…` for demo data. |
 | `razorpay_id` | `text` | no | Payment link ID, or `Not Applicable` for COD and custom invoices. |
 | `name`, `email`, `phone`, `address` | `text` | no | Customer details. `email` links orders to accounts. |
-| `payment_status` | `text` | yes | `pending`, `cod`, or the Razorpay link status (for example `paid` or `cancelled`). |
+| `payment_status` | `text` | yes | `pending`, `cod`, `manual` (custom invoices), or the Razorpay link status (for example `paid` or `cancelled`). |
 | `delivery_status` | `text` | yes | `pending`, `out for delivery`, `delivered` or `cancelled`. A cancelled order keeps its invoice number, so the series has no gaps for GST filing. |
 | `amount` | `numeric` | yes | Order total in rupees. |
-| `products` | `jsonb` | yes | Snapshot of each cart line: the full product row plus `count`. |
+| `products` | `jsonb` | yes | Snapshot of each line, taken on the server: the product row as it was, plus `count`. |
+| `stock_reserved` | `boolean` | yes | True once the order has taken its items out of stock, so cancelling it knows to put them back. |
 
 ### `profiles`
 
@@ -417,23 +423,19 @@ Storage: a public bucket named `productImages`. Admins upload to it, and `/admin
 
 ### Suggested SQL
 
-> [!WARNING]
-> This is a suggested starting point, not the schema of a running store. Test it on a fresh project first. The stricter RLS policies in it **break parts of the current code**: see the list below.
+> [!NOTE]
+> Column types are inferred from what the code reads and writes. Test the SQL on a fresh project before you point a live store at it.
 
-The SQL is in [`supabase/schema.sql`](supabase/schema.sql): the four tables, the sign-up trigger, the `is_admin()` helper, RLS policies and the storage upload policy. It is safe to run more than once. It creates whatever is missing (including the `description` column on older projects) and replaces functions, triggers and policies, but never drops tables or data. Apply it in either of two ways:
+The SQL is in [`supabase/schema.sql`](supabase/schema.sql): the four tables, the sign-up trigger, the `is_admin()` helper, the invoice number sequence, the stock functions, RLS policies and storage policies. It is safe to run more than once. It creates whatever is missing (including newer columns on older projects) and replaces functions, triggers and policies, but never drops tables or data. Apply it in either of two ways:
 
 - Paste it into the Supabase **SQL Editor** and run it.
 - Set `SUPABASE_DB_URL` and run `npm run seed`, which applies it before loading the demo data. See [Demo data](#demo-data).
 
-These parts of the current code depend on looser access and will fail under these policies:
+How access works:
 
-- `fetchInvoiceNumber` runs with the customer's session and reads the highest `invoice_id` across **all** orders. With the policies above it only sees the customer's own orders, so invoice numbers repeat.
-- `/api/verify` uses the browser Supabase client on the server with no session (role `anon`) to update and read the order.
-- `/api/place-order` and `/api/confirm-order` are called server to server without cookies, so they read `transactions` as `anon`.
-- Guest orders: `notifyOrderPlaced` reads the order as the visitor, who is `anon` and cannot select it.
-
-The recommended fix is to give those server paths a separate, server-only Supabase client using the service role key, and to generate invoice numbers in the database (a sequence or a trigger). Until then, you would need to grant `anon` select and update on `transactions`, which exposes every order to anyone holding the anon key.
-<!-- TODO: update the policies once server routes use a service-role client. -->
+- **The browser** (publishable key plus the visitor's session) can read products, a customer's own orders and their own profile. Admins can also read all orders, update orders and products, and list and upload product images. Nobody can insert orders or guest details from the browser.
+- **The server** uses the service role key (`src/utils/supabase/admin.ts`, which can't be imported into browser code) to place orders, verify payments, assign invoice numbers, move stock and send notifications.
+- **Database functions:** `assign_invoice_number(order_id)` hands out the next number from `invoice_number_seq`, once per order. `reserve_stock(items)` takes stock only if every item is available, with the product rows locked, so two checkouts can't both buy the last unit. `adjust_stock(items, direction)` takes or returns stock without checking. Only the service role can call them.
 
 ### Make a user an admin
 
@@ -510,12 +512,12 @@ The guest checkout, Kavya Iyer, has no login. Her COD order appears in `/admin/o
    - Logos: `public/brand-docs/assets/Logos/`. The header uses `siteConfig.wordmarkPath`; the admin sidebar and PDFs use the mark alone, `siteConfig.logoPath`.
    - Icons: [Lucide](https://lucide.dev) through `src/ui/Icon`, which applies the brand size (20px) and stroke (1.75px).
 3. **Content.** Edit `src/app/about/page.tsx`, `about/contact`, `about/terms`, `about/privacy`, `about/shipping` and `about/returns`. Most values come from `siteConfig.policies`, but read every page through and have a legal professional review them.
-4. **Email copy.** Branded HTML templates for Supabase account emails (sign-up, email change, password reset) and Resend order emails (confirmed, out for delivery, delivered, cancelled, new order for the shop) are in [`email-templates/`](email-templates/README.md), with paste-in steps. The two order emails the app sends today are React components: `src/ui/Components/email-order-place.tsx` (to the shop) and `email-order-confirm.tsx` (to the customer). Subjects are set in `src/app/api/place-order/route.ts` and `src/app/api/confirm-order/route.ts`.
+4. **Email copy.** Branded HTML templates for Supabase account emails (sign-up, email change, password reset) and Resend order emails (confirmed, out for delivery, delivered, cancelled, new order for the shop) are in [`email-templates/`](email-templates/README.md), with paste-in steps. The two order emails the app sends today are React components: `src/ui/Components/email-order-place.tsx` (to the shop) and `email-order-confirm.tsx` (to the customer). Subjects are set in `src/utils/orders/notifications.ts`.
 5. **WhatsApp copy.** Message text lives in the Meta templates, not in this repository. The template names, language (`en_US`) and parameters are in `src/utils/functions/handleWhatsapp.ts` and `handleDispatchWhatsapp.ts`.
-6. **Invoices and tax.** Layout: `src/ui/GenerateBill/index.tsx` (order invoices), `src/ui/CustomInvoice/index.tsx` (manual invoices), `src/ui/ExportOrders` and `src/ui/ExportProducts` (exports). Tax rates are entered per product in admin. The invoice prints the stored rate and works out the tax amount as `(price - pretax) × count`. There is no CGST/SGST/IGST split.
+6. **Invoices and tax.** Layout: `src/pdf/templates.tsx` (order and custom invoices, the orders report and the products list). Tax rates are entered per product in admin. The invoice prints the stored rate and works out the tax amount as `(price - pretax) × count`. There is no CGST/SGST/IGST split.
 7. **Currency, phone code and locale.** These are hard-coded:
-   - Currency `INR`: `src/app/api/checkout/route.ts`. Also the `₹` and `Rs.` symbols in components.
-   - Amount in words (`en-IN`, Rupee/Paise): `GenerateBill` and `CustomInvoice`.
+   - Currency `INR`: `src/app/account/checkout/actions.ts`. Also the `₹` and `Rs.` symbols in `src/utils/formatINR.ts` and the PDF templates.
+   - Amount in words (`en-IN`, Rupee/Paise): `src/pdf/templates.tsx`.
    - Phone country code `91`: `handleWhatsapp.ts`, `handleDispatchWhatsapp.ts`.
    - Time zone `Asia/Kolkata`: `GenerateBill`, `src/app/account/orders/page.tsx`, `src/app/admin/orders/page.tsx`.
    - Delivery date `"tomorrow"` in the WhatsApp message: `src/utils/functions/whatsappActions.ts`, `src/app/api/verify/route.ts`.
@@ -528,29 +530,32 @@ src/
 ├── app/
 │   ├── (homepage)/      Store front: catalogue, search, category filter, cart
 │   ├── about/           About, contact, terms, privacy, shipping, returns
-│   ├── account/         Checkout (+ actions.ts), order history, profile
-│   ├── admin/           Dashboard, orders, products, gallery (admin only)
-│   ├── api/             checkout, verify, place-order, confirm-order, pdf
+│   ├── account/         Checkout (+ actions.ts: placeOrder), order history, profile
+│   ├── admin/           Dashboard, orders (+ actions.ts: status, custom invoice), products, gallery
+│   ├── api/             verify (Razorpay callback), pdf (invoices and exports)
 │   ├── auth/            Login, signup, server actions, email confirm route
+│   ├── error/           Shown when an email link or session fails
 │   ├── notifications/   Payment success and failure pages
 │   ├── icon.svg         Favicon
 │   └── layout.tsx       Root layout: global CSS, toasts, Google Analytics
+├── pdf/                 PDF templates, HTML documents and the Chromium renderer
 ├── proxy.ts             Next.js 16 proxy (formerly middleware): Supabase session refresh
 ├── store/
-│   ├── cartStore.ts     Cart (Zustand, sessionStorage)
-│   ├── counterStore.ts  Unused
-│   └── searchText.ts    Unused
+│   └── cartStore.ts     Cart (Zustand, sessionStorage)
 ├── styles/
-│   └── globals.css      Fonts, CSS variables, base styles
+│   └── globals.css      Brand tokens (@theme), fonts, base styles
 ├── types/
 │   └── css.d.ts         CSS module typing
-├── ui/                  Components: Header, Footer, Sidebar, Cart, ProductCard,
+├── ui/                  Components: Header, Footer, Sidebar, CartPanel, ProductCard,
 │                        AddProduct, EditProduct, OrderStatus, GenerateBill,
-│                        CustomInvoice, ExportOrders, ExportProducts, emails
+│                        CustomInvoice, ExportOrders, ExportProducts, Icon, emails
 └── utils/
-    ├── functions/       Email, WhatsApp, invoice number, user helpers
-    ├── middleware/      cors.ts (unused)
-    ├── supabase/        Browser, server and middleware clients
+    ├── functions/       WhatsApp senders and user helpers
+    ├── orders/          Server-only: viewer and admin check, order notifications
+    ├── supabase/        Browser, server, middleware and service-role (admin.ts) clients
+    ├── downloadPdf.ts   Browser helper that asks /api/pdf for a document
+    ├── formatINR.ts     ₹1,299.00 money formatting
+    ├── formatInvoiceNo.ts  INV-2026-0007 invoice numbers
     ├── pdfHead.ts       <head> for PDF HTML (fonts, Tailwind CDN)
     ├── siteConfig.ts    Store details, start here
     ├── siteUrl.ts       SITE_URL from NEXT_PUBLIC_SITE_URL
@@ -574,46 +579,29 @@ src/
 - [ ] Both WhatsApp templates, `order_placed` and `order_dispatched`, are **approved**, and `WHATSAPP_TOKEN` is a permanent System User token.
 - [ ] RLS is enabled on every table and the storage policies are in place. See [Database schema](#database-schema).
 - [ ] `NEXT_PUBLIC_SITE_URL` is set to the production address, and the Supabase Site URL and redirect URLs match it.
-- [ ] `next.config.ts` `images.remotePatterns` points at your own Supabase project.
+- [ ] `SUPABASE_SERVICE_ROLE_KEY` is set in Vercel (server only, never with a `NEXT_PUBLIC_` prefix), and `supabase/schema.sql` has been run on the production project.
 - [ ] `siteConfig.ts` has your real business details, registrations and grievance officer.
-- [ ] The security issues in [Known limitations](#known-limitations-and-security-notes) are fixed, especially payment verification and the client-supplied total.
+- [ ] `CHROME_EXECUTABLE_PATH` is **not** set in Vercel.
+- [ ] The GitHub social preview is uploaded: **Settings > General > Social preview**, using `.github/social-preview.png`.
 - [ ] One end-to-end test order for each payment mode: place it, pay, receive both emails and the WhatsApp message, see it in `/admin/orders`, change the delivery status, receive the dispatch message, download the invoice.
 
 ## Known limitations and security notes
 
-Found while reading the code. The code has **not** been changed for any of these.
+What's still open. Payment verification, server-side totals, the PDF and email routes, row-level security, invoice numbering, stock and the `/error` page were fixed in this version.
 
-> [!WARNING]
-> Fix the first three before you take real payments.
-
-1. **The Razorpay signature is not enforced.** `/api/verify` calls `validatePaymentVerification` but ignores its return value, and the `finally` block always redirects to the success page. Anyone can call `/api/verify` with made-up query parameters (for example `razorpay_payment_link_status=paid`), and the order will be marked paid and notifications sent. Fix: stop when the function returns `false`, and confirm the payment link status with the Razorpay API.
-2. **The order total comes from the browser.** `/api/checkout` charges `totalPrice` as sent by the client, and COD orders store the client's `amount` and `products`. Fix: recompute the total on the server from product IDs and current `products.price`.
-3. **`/api/pdf` is open to anyone.** It renders any HTML it receives in Chromium with `--disable-web-security`, and `next.config.ts` sends `Access-Control-Allow-Origin: *` for every `/api` route. That can be abused for server-side requests and compute. Fix: require a signed-in user (or admin), render invoices from an order ID on the server rather than accepting HTML, and restrict CORS.
-4. **Email routes are open.** Anyone who knows a `transaction_id` can call `/api/place-order` and `/api/confirm-order` to trigger emails. Fix: call the email functions directly from server code instead of through public routes.
-5. **Database access from the server relies on loose RLS.** See the list after [Suggested SQL](#suggested-sql). Fix: use a server-only service-role client for those paths.
-6. **Invoice numbers can collide.** They are computed as max + 1 in application code, so two orders placed at the same moment can get the same number. Custom invoices accept any number the admin types. Fix: use a database sequence.
-7. **Some admin pages have no server-side check.** `/admin/products` and `/admin/gallery` are client components. Only RLS stops non-admins from changing products.
-8. **`/error` does not exist.** `/auth/confirm` and `logout` redirect there on failure.
-9. **The failure page is rarely reached.** `/api/verify` always ends on `/notifications/success`, whatever the payment status. Separately, if Razorpay rejects the amount as too small, `/api/checkout` sends a 307 redirect to `/notifications/failure`, which the browser's `fetch` follows silently.
-10. **WhatsApp token.** Earlier versions read the token from `NEXT_PUBLIC_WHATSAPP_TOKEN` and sent messages from the browser, which exposed it. It is now `WHATSAPP_TOKEN`, used only in server actions and routes. If you deployed an earlier version, rotate the token in Meta Business Settings.
-11. **Values are hard-coded** across the code:
+1. **Some admin pages have no server-side check.** `/admin/products` and `/admin/gallery` are client components. The proxy only requires a signed-in user there; row-level security is what stops non-admins from changing products or listing images.
+2. **No password reset.** There's no "forgot password" form or page to set a new password, so the reset-password and invite emails in `email-templates/` can't be used yet.
+3. **WhatsApp token.** Earlier versions read the token from `NEXT_PUBLIC_WHATSAPP_TOKEN` and sent messages from the browser, which exposed it. It is now `WHATSAPP_TOKEN`, used only on the server. If you deployed an earlier version, rotate the token in Meta Business Settings.
+4. **Values are hard-coded** across the code:
     - the `91` phone prefix, `INR`, `Asia/Kolkata` and `"tomorrow"`
-    - a specific Supabase hostname in `next.config.ts`
-    - the Chromium download URL (v153.0.0) in `/api/pdf`
-    - `http://localhost:3000` in `src/utils/middleware/cors.ts` and `src/app/api/_middleware.ts` (neither file is used)
+    - the Chromium download URL (v153.0.0) in `src/pdf/render.ts`
     - a third-party image resizer link in `AddProduct`
     - Google Fonts and the Tailwind Play CDN loaded into every PDF
-12. **Other small issues:**
-    - Inventory is never decremented on sale.
-    - The customer confirmation email greets the customer by email address.
+5. **Other small issues:**
     - Uploading an image whose file name already exists in the bucket fails.
     - The gallery assumes 5-character file extensions such as `.webp`.
     - The success page clears the cart on every render.
-    - Setting a delivery status to "delivered" also sends the `order_dispatched` message.
-13. **Unused code and dependencies:**
-    - `sassOptions` in `next.config.ts` (Sass is not installed)
-    - `src/store/counterStore.ts` and `src/store/searchText.ts`
-    - `src/ui/Components/email-template.tsx`
+    - An unpaid online order stays `pending` with no invoice number; nothing expires it.
 
 ## Licence and credits
 

@@ -4,7 +4,6 @@ import useCartStore from "@/store/cartStore";
 import { Product } from "@/utils/types";
 import Image from "next/image";
 import QuantityIcon from "../QuantityIcon";
-import { useEffect, useState } from "react";
 import { formatINR } from "@/utils/formatINR";
 
 const ProductCard = ({
@@ -18,19 +17,9 @@ const ProductCard = ({
   const cart = useCartStore((state: any) => state.cart);
   const addToCart = useCartStore((state) => state.addToCart);
   const removeFromCart = useCartStore((state) => state.removeFromCart);
-  const [item, setItem] = useState<Product | null>(null);
-
-  useEffect(() => {
-    const cartItem = cart.find(
-      (cartProduct: Product) => cartProduct.name === product.name
-    );
-
-    if (cartItem) {
-      setItem(cartItem);
-    } else {
-      setItem(null);
-    }
-  }, [cart, product.name]);
+  // Derived from the cart on every render, so it never goes stale.
+  const item: Product | null =
+    cart.find((cartProduct: Product) => cartProduct.id === product.id) ?? null;
 
   return (
     <div className="w-full min-w-0 h-full rounded-md border border-line bg-surface-raised overflow-hidden flex flex-col">

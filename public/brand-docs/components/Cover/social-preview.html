@@ -1,0 +1,54 @@
+<!doctype html>
+<!-- GitHub social preview, 1280 × 640: the Cover composition with the headline.
+     Rendered to .github/social-preview.png; upload it under the repository's
+     Settings > General > Social preview. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Tillwright social preview</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700&family=Instrument+Sans:wght@400;500&display=swap">
+<style>
+  :root {
+    --surface: #F3F5EE; --ink: #22201B; --ink-muted: #5E6359;
+    --field: #1F4D36; --field-soft: #E2EDE5; --rye: #E9B949; --loam: #4A3324;
+  }
+  html, body { margin:0; width:1280px; height:640px; }
+  body { background:var(--surface); color:var(--ink); font-family:"Instrument Sans", system-ui, sans-serif; overflow:hidden; }
+  .cover { position:relative; width:1280px; height:640px; overflow:hidden; }
+  /* The Cover art at 2.2x: the field slab starts at the halfway mark and
+     bleeds off the top, block bottoms sit 48px above the edge. */
+  .art { position:absolute; left:605px; top:11px; width:1056px; height:634px; }
+  .art svg { display:block; width:1056px; height:634px; overflow:visible; }
+  .field { fill:var(--field); } .soft { fill:var(--field-soft); }
+  .rye { fill:var(--rye); } .loam { fill:var(--loam); } .cut { fill:var(--surface); }
+  .words { position:absolute; left:64px; bottom:64px; width:552px; }
+  .name { margin:0; font-family:"Bricolage Grotesque", system-ui, sans-serif; font-size:112px; line-height:.92; font-weight:700; letter-spacing:-.02em; }
+  .head { margin:28px 0 0 4px; font-size:32px; line-height:40px; font-weight:500; }
+  .line { margin:12px 0 0 4px; font-size:22px; line-height:32px; color:var(--ink-muted); }
+</style>
+</head>
+<body>
+<div class="cover">
+  <div class="art" aria-hidden="true">
+    <svg viewBox="0 0 480 288">
+      <rect class="field" rx="16" x="16" y="-24" width="208" height="288"/>
+      <circle class="rye" cx="120" cy="104" r="48"/>
+      <rect class="field" rx="16" x="16" y="104" width="208" height="160"/>
+      <rect class="cut" x="16" y="104" width="208" height="6"/>
+      <polygon class="cut" points="104,110 110,110 92,264 72,264"/>
+      <polygon class="cut" points="130,110 136,110 168,264 148,264"/>
+      <polygon class="cut" points="80,110 86,110 32,264 16,264 16,236"/>
+      <polygon class="cut" points="154,110 160,110 224,226 224,256"/>
+      <rect class="loam" rx="10" x="240" y="128" width="112" height="136"/>
+      <rect class="rye" rx="12" x="240" y="88" width="64" height="24"/>
+      <rect class="soft" rx="16" x="368" y="32" width="144" height="232"/>
+    </svg>
+  </div>
+  <div class="words">
+    <h1 class="name">Tillwright</h1>
+    <p class="head">Commerce for your Supabase app.</p>
+    <p class="line">Products, carts, orders and Razorpay checkout in the database you already have.</p>
+  </div>
+</div>
+</body>
+</html>

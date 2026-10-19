@@ -187,7 +187,7 @@ export default function Privacy() {
         Website.
       </p>
 
-      <h2>Grievance officer</h2>
+      <h2>Grievance Officer</h2>
       <p>
         If you have concerns about how your personal data is handled, you can
         contact our Grievance Officer:

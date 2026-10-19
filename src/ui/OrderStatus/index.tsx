@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
-import { notifyOrderDispatched } from "@/utils/functions/whatsappActions";
+import { updateDeliveryStatus } from "@/app/admin/orders/actions";
 import { ChevronDown } from "lucide-react";
 import Icon from "@/ui/Icon";
 
@@ -73,20 +73,14 @@ export default function OrderStatus({ id }: any) {
     setClickStatus(false);
     if (status === deliveryStatus) return;
 
-    const { error } = await supabase
-      .from("transactions")
-      .update({ delivery_status: status })
-      .eq("id", id);
-
-    if (error) {
-      console.error(error);
+    // The server checks the admin, adjusts stock on cancel and sends the
+    // dispatch message.
+    const result = await updateDeliveryStatus(Number(id), status);
+    if (!result.ok) {
+      console.error(result.error);
       return;
     }
-
     setDeliveryStatus(status);
-    if (status === "out for delivery" || status === "delivered") {
-      notifyOrderDispatched(id);
-    }
   }
 
   if (loading)

@@ -256,17 +256,9 @@ async function upsertOrders(productRows: Map<string, ProductRow>) {
   if (error) fail(`reading transactions: ${error.message}`);
   const existing = new Map((existingRows ?? []).map((r) => [r.transaction_id, r]));
 
-  // Invoice numbers follow the app: integers, max + 1. Seeded orders keep the
-  // number they were given; new ones continue after the highest in use.
-  const { data: maxRow, error: maxError } = await supabase
-    .from("transactions")
-    .select("invoice_id")
-    .not("invoice_id", "is", null)
-    .order("invoice_id", { ascending: false })
-    .limit(1);
-  if (maxError) fail(`reading invoice numbers: ${maxError.message}`);
-  let nextInvoice = (maxRow?.[0]?.invoice_id ?? 0) + 1;
-
+  // Invoice numbers come from the database sequence, like real orders
+  // (assign_invoice_number in supabase/schema.sql). Seeded orders keep the
+  // number they were given.
   // Number new orders oldest first, so invoice order follows date order.
   const byDate = [...orders].sort(
     (a, b) => orderTime(a.daysAgo, a.hour).localeCompare(orderTime(b.daysAgo, b.hour)),
@@ -292,12 +284,16 @@ async function upsertOrders(productRows: Map<string, ProductRow>) {
         .eq("id", current.id);
       if (updateError) fail(`updating ${order.ref}: ${updateError.message}`);
     } else {
-      const { error: insertError } = await supabase.from("transactions").insert({
-        ...row,
-        invoice_id: nextInvoice++,
-        created_at: orderTime(order.daysAgo, order.hour),
+      const { data: inserted, error: insertError } = await supabase
+        .from("transactions")
+        .insert({ ...row, created_at: orderTime(order.daysAgo, order.hour) })
+        .select("id")
+        .single();
+      if (insertError || !inserted) fail(`inserting ${order.ref}: ${insertError?.message}`);
+      const { error: invoiceError } = await supabase.rpc("assign_invoice_number", {
+        order_id: inserted.id,
       });
-      if (insertError) fail(`inserting ${order.ref}: ${insertError.message}`);
+      if (invoiceError) fail(`numbering ${order.ref}: ${invoiceError.message}`);
       created++;
     }
   }
@@ -317,6 +313,8 @@ function rowFor(order: SeedOrder, lines: unknown[], amount: number) {
     delivery_status: order.delivery_status,
     amount,
     products: lines,
+    // The seed sets inventory directly, so seeded orders hold no stock.
+    stock_reserved: false,
   };
 }
 
