@@ -1,5 +1,5 @@
 import { EmailTemplateProps } from "@/utils/types";
-import { siteConfig } from "@/utils/siteConfig";
+import { SITE_URL } from "@/utils/siteUrl";
 
 export const OrderPlacedTemplate = ({
   transaction_id,
@@ -22,7 +22,7 @@ export const OrderPlacedTemplate = ({
         </p>
       </div>
     ))}
-    <a href={`${siteConfig.websiteUrl}/admin/orders`}>
+    <a href={`${SITE_URL}/admin/orders`}>
       Visit Dashboard for more details
     </a>
   </div>

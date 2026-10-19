@@ -8,9 +8,9 @@ export const siteConfig = {
   // Registered business name, shown on invoices and in legal pages.
   legalName: "Tillwright",
   description: "Shop online and get your order delivered to your door.",
-  website: "tillwright.app",
+  website: "tillwright.vercel.app",
   // Public site address, used for links in emails and logo URLs in PDFs.
-  websiteUrl: "https://www.tillwright.app",
+  websiteUrl: "https://tillwright.vercel.app",
   // The mark alone: favicon-sized spaces, the admin sidebar and PDFs.
   logoPath: "/brand-docs/assets/Logos/tillwright-mark.svg",
   // Mark plus name, for the site header (brand-docs: headers use the wordmark).
@@ -52,7 +52,7 @@ export const siteConfig = {
 
   // --- Emails ---
   // The sending address must be on a domain verified in Resend.
-  emailFrom: "Tillwright <orders@tillwright.app>",
+  emailFrom: "Tillwright <onboarding@resend.dev>",
   // Where new-order notifications are sent.
   adminEmail: "orders@tillwright.app",
   emailSignature: "The Tillwright Team",

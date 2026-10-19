@@ -7,6 +7,7 @@ import { toZonedTime } from "date-fns-tz";
 import { ToWords } from "to-words";
 import { Order, Product } from "@/utils/types";
 import { siteConfig } from "@/utils/siteConfig";
+import { SITE_URL } from "@/utils/siteUrl";
 import { formatAmount } from "@/utils/formatINR";
 import { formatInvoiceNo } from "@/utils/formatInvoiceNo";
 
@@ -217,7 +218,7 @@ export const OrdersReportTemplate = ({
       <div className="flex justify-between items-center mb-4">
         <span className="flex gap-4 items-center">
           <img
-            src={`${siteConfig.websiteUrl}${siteConfig.logoPath}`}
+            src={`${SITE_URL}${siteConfig.logoPath}`}
             className="w-12 h-12"
             alt={`${siteConfig.name} logo`}
           />
@@ -295,7 +296,7 @@ export const ProductsListTemplate = ({ products }: { products: Product[] }) => {
       <div className="flex justify-between items-center mb-4">
         <span className="flex gap-4 items-center">
           <img
-            src={`${siteConfig.websiteUrl}${siteConfig.logoPath}`}
+            src={`${SITE_URL}${siteConfig.logoPath}`}
             className="w-12 h-12"
             alt={`${siteConfig.name} logo`}
           />

@@ -11,6 +11,8 @@
 
 <p>Products, carts, orders and Razorpay-ready checkout in the database you already have. No second server.</p>
 
+<p><a href="https://tillwright.vercel.app"><strong>Live demo</strong></a> · This is a temporary host. Online payments and emails are off, so check out with cash on delivery.</p>
+
 <p>
   <a href="LICENSE"><img alt="MIT licence" src="https://img.shields.io/badge/licence-MIT-E9B949"></a>
   <a href="package.json"><img alt="Version 1.2.0" src="https://img.shields.io/badge/version-1.2.0-1F4D36"></a>
