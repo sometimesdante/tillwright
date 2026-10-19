@@ -597,7 +597,8 @@ What's still open. Payment verification, server-side totals, the PDF and email r
     - the Chromium download URL (v153.0.0) in `src/pdf/render.ts`
     - a third-party image resizer link in `AddProduct`
     - Google Fonts and the Tailwind Play CDN loaded into every PDF
-5. **Other small issues:**
+5. **Online orders can oversell.** Online orders don't reserve stock at checkout; `/api/verify` takes it only after payment, through `adjust_stock`, which doesn't check availability and stops at 0. If two customers pay for the last unit, both orders go through and inventory shows 0 instead of -1. Cancelling one of them then puts the unit back, so the product shows 1 in stock when there are none.
+6. **Other small issues:**
     - Uploading an image whose file name already exists in the bucket fails.
     - The gallery assumes 5-character file extensions such as `.webp`.
     - The success page clears the cart on every render.
