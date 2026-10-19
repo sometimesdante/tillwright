@@ -18,8 +18,13 @@ import {
   products,
   type SeedOrder,
 } from "./seed-data";
+import {
+  APP_METADATA,
+  PRODUCT_IMAGE_FOLDER,
+  STORAGE_BUCKET as BUCKET,
+  TILLWRIGHT_SCHEMA,
+} from "../src/utils/supabase/config";
 
-const BUCKET = "productImages";
 const IMAGE_PREFIX = "seed-";
 const ORDER_PREFIX = "seed_";
 const ASSETS = join(process.cwd(), "scripts", "seed-assets");
@@ -43,6 +48,7 @@ if (!serviceKey) fail("SUPABASE_SERVICE_ROLE_KEY is not set.");
 
 const supabase = createClient(url, serviceKey, {
   auth: { autoRefreshToken: false, persistSession: false },
+  db: { schema: TILLWRIGHT_SCHEMA },
 });
 
 const reset = process.argv.includes("--reset");
@@ -97,12 +103,19 @@ function orderTime(daysAgo: number, hour: number): string {
   return (utc > latest ? latest : utc).toISOString();
 }
 
+// Storage path of a seeded product image inside the bucket.
+function imagePath(slug: string): string {
+  return `${PRODUCT_IMAGE_FOLDER}/${IMAGE_PREFIX}${slug}.webp`;
+}
+
 // Placeholder Razorpay payment link id, stable per order.
 function paymentLinkId(ref: string): string {
   return `plink_Seed${ref.replace(ORDER_PREFIX, "").replace(/[^A-Za-z0-9]/g, "")}Demo`;
 }
 
 // --- Schema ----------------------------------------------------------------
+
+const SCHEMA_NOT_EXPOSED = `the Supabase API doesn't expose the ${TILLWRIGHT_SCHEMA} schema. Add it under Project Settings > Data API > Exposed schemas, then run the seed again.`;
 
 // With SUPABASE_DB_URL set, apply supabase/schema.sql (safe to re-run). The
 // Supabase API can't run DDL, so this needs a direct Postgres connection.
@@ -131,12 +144,14 @@ async function ensureSchema(): Promise<string> {
     for (let attempt = 0; attempt < 10; attempt++) {
       const { error } = await supabase.from("products").select("id").limit(1);
       if (!error) return "applied";
+      if (error.code === "PGRST106") fail(SCHEMA_NOT_EXPOSED);
       await new Promise((resolve) => setTimeout(resolve, 1000));
     }
     fail("schema applied, but the Supabase API still can't see the tables. Run the seed again in a minute.");
   }
 
   const { error } = await supabase.from("products").select("id").limit(1);
+  if (error?.code === "PGRST106") fail(SCHEMA_NOT_EXPOSED);
   if (error?.code === "PGRST205") {
     fail(
       "the tables don't exist yet. Either set SUPABASE_DB_URL in .env.local so the seed can create them, or run supabase/schema.sql in the Supabase SQL Editor.",
@@ -159,13 +174,13 @@ async function ensureBucket() {
 async function uploadImages(): Promise<Map<string, string>> {
   const urls = new Map<string, string>();
   for (const p of products) {
-    const file = `${IMAGE_PREFIX}${p.slug}.webp`;
-    const body = readFileSync(join(ASSETS, file));
+    const path = imagePath(p.slug);
+    const body = readFileSync(join(ASSETS, `${IMAGE_PREFIX}${p.slug}.webp`));
     const { error } = await supabase.storage
       .from(BUCKET)
-      .upload(file, body, { contentType: "image/webp", upsert: true });
-    if (error) fail(`uploading ${file}: ${error.message}`);
-    urls.set(p.slug, supabase.storage.from(BUCKET).getPublicUrl(file).data.publicUrl);
+      .upload(path, body, { contentType: "image/webp", upsert: true });
+    if (error) fail(`uploading ${path}: ${error.message}`);
+    urls.set(p.slug, supabase.storage.from(BUCKET).getPublicUrl(path).data.publicUrl);
   }
   return urls;
 }
@@ -212,13 +227,13 @@ async function upsertAccounts() {
       ? await supabase.auth.admin.updateUserById(existing.id, {
           password,
           email_confirm: true,
-          user_metadata: account.metadata,
+          user_metadata: { ...account.metadata, ...APP_METADATA },
         })
       : await supabase.auth.admin.createUser({
           email: account.email,
           password,
           email_confirm: true,
-          user_metadata: account.metadata,
+          user_metadata: { ...account.metadata, ...APP_METADATA },
         });
     if (error || !data.user) fail(`saving user ${account.email}: ${error?.message}`);
 
@@ -362,7 +377,7 @@ async function resetSeed() {
     tally.users++;
   }
 
-  const files = products.map((p) => `${IMAGE_PREFIX}${p.slug}.webp`);
+  const files = products.map((p) => imagePath(p.slug));
   const { data: removed, error: storageError } = await supabase.storage
     .from(BUCKET)
     .remove(files);
@@ -376,7 +391,7 @@ async function resetSeed() {
   console.log(
     `  orders ${tally.orders} · products ${tally.products} · guests ${tally.guests} · users ${tally.users} · images ${tally.images}`,
   );
-  console.log("  Nothing else was touched. The productImages bucket is kept.");
+  console.log(`  Nothing else was touched. The ${BUCKET} bucket is kept.`);
 }
 
 // --- Main ------------------------------------------------------------------

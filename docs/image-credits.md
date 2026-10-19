@@ -1,6 +1,6 @@
 # Seed image credits
 
-Product images used by `npm run seed`. The files are in `scripts/seed-assets/`, resized to 1200 px wide WebP, and uploaded to the `productImages` bucket as `seed-<slug>.webp`.
+Product images used by `npm run seed`. The files are in `scripts/seed-assets/`, resized to 1200 px wide WebP, and uploaded to the `tillwright` bucket as `products/seed-<slug>.webp`.
 
 ## Photos from Unsplash
 

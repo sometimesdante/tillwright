@@ -1,6 +1,7 @@
 "use client";
 
 import { createClient } from "@/utils/supabase/client";
+import { PRODUCT_IMAGE_FOLDER, STORAGE_BUCKET } from "@/utils/supabase/config";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
@@ -8,22 +9,28 @@ export default function GalleryDashboard() {
 
   const supabase = createClient();
   const [files, setFiles] = useState<any[]>([]);
-  const bucket = "productImages";
 
   useEffect(() => {
     let ignore = false;
     (async () => {
-      const { data, error } = await supabase.storage.from(bucket).list();
+      const { data, error } = await supabase.storage
+        .from(STORAGE_BUCKET)
+        .list(PRODUCT_IMAGE_FOLDER);
       if (ignore) return;
       if (error) {
         console.error("Error fetching files:", error);
         return;
       }
       setFiles(
-        (data ?? []).map((file) => ({
-          ...file,
-          url: supabase.storage.from(bucket).getPublicUrl(file.name).data.publicUrl,
-        })),
+        (data ?? [])
+          // Skip sub-folders and the placeholder the dashboard adds to new folders.
+          .filter((file) => file.id && file.name !== ".emptyFolderPlaceholder")
+          .map((file) => ({
+            ...file,
+            url: supabase.storage
+              .from(STORAGE_BUCKET)
+              .getPublicUrl(`${PRODUCT_IMAGE_FOLDER}/${file.name}`).data.publicUrl,
+          })),
       );
     })();
     return () => {

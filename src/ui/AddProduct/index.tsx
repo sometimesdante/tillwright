@@ -1,6 +1,7 @@
 "use client";
 
 import { createClient } from "@/utils/supabase/client";
+import { PRODUCT_IMAGE_FOLDER, STORAGE_BUCKET } from "@/utils/supabase/config";
 import Link from "next/link";
 import { useState } from "react";
 import {
@@ -24,7 +25,6 @@ export default function AddProduct({
   const [error, setError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const bucket = "productImages";
 
   const close = () => {
     setShowFields(false);
@@ -33,7 +33,7 @@ export default function AddProduct({
   };
 
   const getURL = (path: string) => {
-    const { data } = supabase.storage.from(bucket).getPublicUrl(path);
+    const { data } = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(path);
     setImageURL(data.publicUrl);
   };
 
@@ -44,8 +44,8 @@ export default function AddProduct({
     setUploading(true);
     setError(null);
     const { data, error } = await supabase.storage
-      .from(bucket)
-      .upload(file.name, file);
+      .from(STORAGE_BUCKET)
+      .upload(`${PRODUCT_IMAGE_FOLDER}/${file.name}`, file);
     setUploading(false);
 
     if (error) {

@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createClient } from "@supabase/supabase-js";
+import { TILLWRIGHT_SCHEMA } from "./config";
 
 // Service-role client for trusted server code: placing orders, verifying
 // payments, invoice numbers, stock and notifications. It bypasses row-level
@@ -17,5 +18,6 @@ export function createAdminClient() {
   }
   return createClient(url, serviceKey, {
     auth: { autoRefreshToken: false, persistSession: false },
+    db: { schema: TILLWRIGHT_SCHEMA },
   });
 }

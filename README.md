@@ -71,8 +71,8 @@ Tillwright puts products, carts, orders, checkout and GST invoices in the Supaba
 | | Bill contents | Shop registrations (GST, PAN, FSSAI), customer details, MRP, unit price, tax rate, tax amount, savings, and the total in words (en-IN). |
 | | Custom invoice | Admin can create a one-line invoice for a sale outside the store. It takes the next number in the series. |
 | Admin | Dashboard | `/admin` with links to orders and products. Access requires `profiles.role = 'admin'`. |
-| | Products | Add and edit products, and upload images to the `productImages` storage bucket. |
-| | Gallery | Read-only grid of the images in `productImages`. |
+| | Products | Add and edit products, and upload images to `products/` in the `tillwright` storage bucket. |
+| | Gallery | Read-only grid of the product images in the `tillwright` bucket. |
 | | Orders | Order list with customer details, a delivery status dropdown and per-order invoice download. Cancelling an order puts its stock back. |
 | | Exports | PDF export of orders for a date range and of in-stock products. There is no CSV export. |
 | Analytics | Google Analytics | `@next/third-parties` GA tag on every page, plus a `buttonClicked` event when an order is placed. |
@@ -212,7 +212,7 @@ You need Node.js 22 or later (set in `engines` in `package.json`) and npm. Check
 
 4. Fill in `.env.local` using [Set up your accounts](#set-up-your-accounts). Leave `NEXT_PUBLIC_SITE_URL=http://localhost:3000` for local work.
 
-5. Create the database tables and storage bucket: run [`supabase/schema.sql`](supabase/schema.sql) in the Supabase SQL Editor, or let `npm run seed` do it. See [Database schema](#database-schema).
+5. Create the `tillwright` schema, its tables and the storage bucket: run [`supabase/schema.sql`](supabase/schema.sql) in the Supabase SQL Editor, or let `npm run seed` do it. Then add `tillwright` to the exposed schemas. See [Database schema](#database-schema).
 
 6. Start the development server.
 
@@ -234,8 +234,8 @@ You need Node.js 22 or later (set in `engines` in `package.json`) and npm. Check
 2. Open **Project Settings > API** and copy:
    - **Project URL** into `NEXT_PUBLIC_SUPABASE_URL`
    - **Publishable** key (`sb_publishable_...`) into `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
-3. Open **SQL Editor** and run the schema in [Database schema](#database-schema).
-4. Open **Storage**, create a bucket named exactly `productImages`, and mark it **public**. The code reads images with `getPublicUrl`.
+3. Open **SQL Editor** and run the schema in [Database schema](#database-schema). It creates the `tillwright` schema and the public `tillwright` storage bucket.
+4. Open **Project Settings > Data API** and add `tillwright` to **Exposed schemas**. Every client in the app reads and writes this schema, so until it is exposed every query fails with `PGRST106`. SQL can't change this setting.
 5. Open **Authentication > URL Configuration**:
    - Set **Site URL** to your production address, for example `https://www.tillwright.app`.
    - Add `http://localhost:3000/**` and your production `https://www.tillwright.app/**` to **Redirect URLs**.
@@ -249,7 +249,7 @@ You need Node.js 22 or later (set in `engines` in `package.json`) and npm. Check
 7. Update `images.remotePatterns` in `next.config.ts` to your own project's hostname (`<project-ref>.supabase.co`). It is currently hard-coded to a different project.
 
 > [!NOTE]
-> The code never creates rows in `profiles`, but the admin check reads them. Create a profile row for each admin by hand, or add the trigger in [Database schema](#database-schema).
+> The app can share a Supabase project with other apps. Sign-ups from this app carry `{"app": "tillwright"}` in their user metadata, and the `tillwright_on_auth_user_created` trigger creates a `tillwright.profiles` row only for those. Users and sign-ins (`auth.users`) are still shared by the whole project: someone who signed up through another app can sign in here, but has no profile and is never an admin.
 
 </details>
 
@@ -363,7 +363,9 @@ Every variable the code reads. `.env.example` lists the same set with placeholde
 
 ## Database schema
 
-The code expects four tables and one storage bucket. Column types are inferred from what the code reads and writes, because the repository has no migrations.
+The code expects four tables in the `tillwright` schema and one storage bucket named `tillwright`. Nothing in the app reads or writes the `public` schema or any other bucket, so the project can host other apps. Column types are inferred from what the code reads and writes, because the repository has no migrations.
+
+The schema and bucket names are set in [`src/utils/supabase/config.ts`](src/utils/supabase/config.ts) and hard-coded in `supabase/schema.sql`. Every Supabase client (browser, server, middleware, service role and the seed) uses `db: { schema: 'tillwright' }`, so `.from()` and `.rpc()` calls need no prefix.
 
 <!-- TODO: replace this section with exported migrations from the real database. -->
 
@@ -376,7 +378,7 @@ The code expects four tables and one storage bucket. Column types are inferred f
 | `name` | `text` | yes | Searched with `ilike`. |
 | `category` | `text` | no | Feeds the category filter. |
 | `description` | `text` | no | Two or three sentences, shown on the product card. |
-| `image_url` | `text` | no | Public URL from the `productImages` bucket. |
+| `image_url` | `text` | no | Public URL of an image under `products/` in the `tillwright` bucket. |
 | `purchase` | `numeric` | no | Purchase price ("PP" in admin). Shown only in admin. |
 | `mrp` | `numeric` | no | Maximum retail price. Used for "You saved" on invoices. |
 | `pretax` | `numeric` | no | Labelled "Special" in admin and "Unit Price" on invoices. |
@@ -421,20 +423,25 @@ The code does not enforce any foreign keys. Records are linked by email:
 - `transactions.email` = the customer's `auth.users.email` (order history)
 - `profiles.email` = `auth.users.email` (admin check)
 
-Storage: a public bucket named `productImages`. Admins upload to it, and `/admin/gallery` lists it.
+Storage: a public bucket named `tillwright`, with product images under `products/`. Admins upload there, and `/admin/gallery` lists that folder. The storage policies only cover `products/` in this bucket.
 
 ### Suggested SQL
 
 > [!NOTE]
 > Column types are inferred from what the code reads and writes. Test the SQL on a fresh project before you point a live store at it.
 
-The SQL is in [`supabase/schema.sql`](supabase/schema.sql): the four tables, the sign-up trigger, the `is_admin()` helper, the invoice number sequence, the stock functions, RLS policies and storage policies. It is safe to run more than once. It creates whatever is missing (including newer columns on older projects) and replaces functions, triggers and policies, but never drops tables or data. Apply it in either of two ways:
+The SQL is in [`supabase/schema.sql`](supabase/schema.sql): the `tillwright` schema and its grants, the four tables, the sign-up trigger, the `is_admin()` helper, the invoice number sequence, the stock functions, RLS policies, the `tillwright` bucket and its storage policies. It is safe to run more than once. It creates whatever is missing (including newer columns on older projects) and replaces functions, triggers and policies, but never drops tables or data. Apply it in either of two ways:
 
 - Paste it into the Supabase **SQL Editor** and run it.
 - Set `SUPABASE_DB_URL` and run `npm run seed`, which applies it before loading the demo data. See [Demo data](#demo-data).
 
+Then add `tillwright` under **Project Settings > Data API > Exposed schemas**.
+
+Because the project may be shared, the SQL names everything it creates outside its own schema after the app: the trigger on `auth.users` is `tillwright_on_auth_user_created`, and the policies on `storage.objects` start with `tillwright:`. It never drops another app's trigger or policies.
+
 How access works:
 
+- **Grants:** `anon` can read products. `authenticated` can read products, orders, profiles and guest details, insert and update products, and update orders. RLS then narrows these to the rows each user may see. `service_role` has full access to the schema's tables and sequences.
 - **The browser** (publishable key plus the visitor's session) can read products, a customer's own orders and their own profile. Admins can also read all orders, update orders and products, and list and upload product images. Nobody can insert orders or guest details from the browser.
 - **The server** uses the service role key (`src/utils/supabase/admin.ts`, which can't be imported into browser code) to place orders, verify payments, assign invoice numbers, move stock and send notifications.
 - **Database functions:** `assign_invoice_number(order_id)` hands out the next number from `invoice_number_seq`, once per order. `reserve_stock(items)` takes stock only if every item is available, with the product rows locked, so two checkouts can't both buy the last unit. `adjust_stock(items, direction)` takes or returns stock without checking. Only the service role can call them.
@@ -447,11 +454,11 @@ The app treats a signed-in user as an admin when a `profiles` row with the same 
 2. In the Supabase SQL Editor, run:
 
    ```sql
-   -- With the trigger above, the row already exists:
-   update public.profiles set role = 'admin' where email = 'orders@tillwright.app';
+   -- Accounts that signed up through this app already have a row:
+   update tillwright.profiles set role = 'admin' where email = 'orders@tillwright.app';
 
-   -- Without the trigger, insert it:
-   insert into public.profiles (id, email, role)
+   -- An account created elsewhere (another app, or the dashboard) has none, so insert it:
+   insert into tillwright.profiles (id, email, role)
    select id, email, 'admin' from auth.users where email = 'orders@tillwright.app';
    ```
 
@@ -486,7 +493,7 @@ The data lives in `scripts/seed-data.ts`. Six more catalogue items that need fea
    npm run seed
    ```
 
-   With `SUPABASE_DB_URL` set, it first applies [`supabase/schema.sql`](supabase/schema.sql). Without it, run that file in the SQL Editor first; the seed stops with a message if the tables are missing. It also creates the public `productImages` bucket if it's missing.
+   With `SUPABASE_DB_URL` set, it first applies [`supabase/schema.sql`](supabase/schema.sql). Without it, run that file in the SQL Editor first; the seed stops with a message if the tables are missing. It also creates the public `tillwright` bucket if it's missing and uploads the product images to `products/`. If the seed reports that the schema isn't exposed, add `tillwright` under **Project Settings > Data API > Exposed schemas** and run it again.
 
 Running it again updates the same rows instead of adding more: products match on name, accounts and guests on email, and orders on their `seed_` reference. Orders keep their original dates and invoice numbers, so the invoice series never changes. To remove only the seeded rows, users and images, and nothing else:
 
@@ -579,7 +586,7 @@ src/
 - [ ] Razorpay KYC is complete and **live** `RAZORPAY_KEY_ID` and `RAZORPAY_KEY_SECRET` are set in Vercel.
 - [ ] The Resend domain shows **Verified**, and `siteConfig.emailFrom` uses it.
 - [ ] Both WhatsApp templates, `order_placed` and `order_dispatched`, are **approved**, and `WHATSAPP_TOKEN` is a permanent System User token.
-- [ ] RLS is enabled on every table and the storage policies are in place. See [Database schema](#database-schema).
+- [ ] RLS is enabled on every table, the storage policies are in place, and `tillwright` is listed under **Data API > Exposed schemas**. See [Database schema](#database-schema).
 - [ ] `NEXT_PUBLIC_SITE_URL` is set to the production address, and the Supabase Site URL and redirect URLs match it.
 - [ ] `SUPABASE_SERVICE_ROLE_KEY` is set in Vercel (server only, never with a `NEXT_PUBLIC_` prefix), and `supabase/schema.sql` has been run on the production project.
 - [ ] `siteConfig.ts` has your real business details, registrations and grievance officer.

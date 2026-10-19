@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { createClient } from "@/utils/supabase/server";
+import { APP_METADATA } from "@/utils/supabase/config";
 
 export async function login(formData: FormData) {
   const supabase = await createClient();
@@ -34,6 +35,7 @@ export async function signup(formData: FormData) {
         name: formData.get("name") as string,
         phone: formData.get("phone") as any,
         address: formData.get("address") as string,
+        ...APP_METADATA,
       },
     },
   };
